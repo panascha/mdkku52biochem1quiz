@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="vendor\materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+</head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CXPE1MX3HS"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-CXPE1MX3HS');
+</script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        display: flex;
+        /* Center the container horizontally */
+        justify-content: center;
+    }
+
+    .center-column {
+        text-align: center;
+        /* Center elements within the container */
+    }
+
+    #question {
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 30px;
+    }
+
+    #choices {
+        display: flex;
+        flex-wrap: wrap;
+        /* Wrap choices if needed */
+        margin-bottom: 10px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    #choices button {
+        background-color: rgb(220, 217, 217);
+        /* Default button color */
+        color: black;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        /* Indicate clickable cursor */
+        margin: 5px;
+        /* Add space between choices */
+        transition: background-color 0.3s;
+        /* Add smooth color transition on hover */
+    }
+
+    #choices button:hover {
+        background-color: darkgray;
+        /* Button color on hover */
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        /* Add subtle shadow on hover */
+    }
+
+    #choices button:active {
+        background-color: rgb(133, 133, 133);
+        color: rgb(206, 206, 206);
+    }
+
+    #submit-btn {
+        background-color: black;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    #submit-btn:hover {
+        background-color: rgb(57, 57, 57);
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #feedback.correct {
+        color: black;
+        /* Default green for correct answer */
+        margin-top: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 30px;
+    }
+
+    #feedback.incorrect {
+        color: black;
+        /* Red for incorrect answer */
+        margin: 20px 0;
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 30px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    #prev-question {
+        background-color: black;
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    #next-question {
+        background-color: black;
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table th {
+        background-color: rgb(40, 40, 40);
+        color: white;
+        padding: 10px;
+    }
+
+    table td {
+        border: 1px solid black;
+        padding: 10px;
+    }
+
+    #quiz-container {
+        width: 100%;
+        border: 1px solid rgb(70, 70, 70);
+        padding: 20px;
+        border-radius: 5px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+
+    }
+
+    .small {
+        font-size: 13px;
+        color: gray;
+
+    }
+
+    input {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        border: 1px solid rgb(70, 70, 70);
+        /*increase check box size*/
+        transform: scale(1.5);
+    }
+
+    .checkbox-container {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        border: 1px solid rgb(70, 70, 70);
+        justify-content: center;
+        text-align: center;
+    }
+
+    .small {
+        font-size: 13px;
+        color: gray;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        var questions1 = [{
+            problem: "What is the smallest unit of a living organism?",
+            choices: "Atom/Molecule/Organelle/Cell/Tissue",
+            answer: "Cell",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of cell has multiple compartments and a well-developed endomembrane system?",
+            choices: "Prokaryotic cell/Eukaryotic cell",
+            answer: "Eukaryotic cell",
+            select: "",
+            state: false
+        }, {
+            problem: "Which chemical bond is easily disrupted by water due to hydration?",
+            choices: "Covalent bond/Ionic bond/Hydrogen bond/Van der Waals interaction/Hydrophobic interaction",
+            answer: "Ionic bond",
+            select: "",
+            state: false
+        }, {
+            problem: "What structures are formed by amphipathic molecules in aqueous solutions?",
+            choices: "Micelles/Bilayers/Vesicles/All of the above/None of the above",
+            answer: "Micelles",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three examples of amphipathic molecules.",
+            choices: "Detergents, bile salts, and long-chain fatty acids/Glucose, fructose, and sucrose/DNA, RNA, and proteins/Hemoglobin, myoglobin, and albumin/None of the above",
+            answer: "Detergents, bile salts, and long-chain fatty acids",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the four most common elements found in biomolecules?",
+            choices: "Carbon (C), Hydrogen (H), Oxygen (O), and Nitrogen (N)/Sodium (Na), Potassium (K), Chloride (Cl), and Calcium (Ca)/Iron (Fe), Zinc (Zn), Copper (Cu), and Magnesium (Mg)/Phosphorus (P), Sulfur (S), Chlorine (Cl), and Iodine (I)/None of the above",
+            answer: "Carbon (C), Hydrogen (H), Oxygen (O), and Nitrogen (N)",
+            select: "",
+            state: false
+        }, {
+            problem: "What term describes the complete set of small molecules found in a biological sample, such as a cell or tissue?",
+            choices: "Metabolome/Genome/Proteome/Transcriptome/Lipidome",
+            answer: "Metabolome",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of secondary metabolites that have distinct biological activities.",
+            choices: "Penicillin and caffeine/Glucose and fructose/Hemoglobin and myoglobin/DNA and RNA/None of the above",
+            answer: "Penicillin and caffeine",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of chemical bond is primarily involved in the formation of the primary structure of biomolecules like proteins and nucleic acids?",
+            choices: "Covalent bond/Ionic bond/Hydrogen bond/Van der Waals interaction/Hydrophobic interaction",
+            answer: "Covalent bond",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of molecular interaction plays a crucial role in stabilizing the higher-order structures of biomolecules and forming supramolecular complexes?",
+            choices: "Non-covalent interaction/Covalent bond/None of the above",
+            answer: "Non-covalent interaction",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of supramolecular complexes found in living cells.",
+            choices: "Cytoskeleton and cell membrane/Ribosomes and mitochondria/Lysosomes and peroxisomes/Nucleus and endoplasmic reticulum/None of the above",
+            answer: "Cytoskeleton and cell membrane",
+            select: "",
+            state: false
+        }, {
+            problem: "Besides acting as a solvent, give three additional crucial functions of water in living organisms.",
+            choices: "Reactant (in hydrolysis), Heat buffer, and Transportation/Energy source, Building block, and Signaling molecule/Genetic information storage, Protein synthesis, and Enzyme catalyst/Structural support, Mechanical strength, and Cell adhesion/None of the above",
+            answer: "Reactant (in hydrolysis), Heat buffer, and Transportation",
+            select: "",
+            state: false
+        }, {
+            problem: "What blood protein plays a crucial role in maintaining the osmotic balance within blood vessels?",
+            choices: "Albumin/Hemoglobin/Fibrinogen/Immunoglobulin/None of the above",
+            answer: "Albumin",
+            select: "",
+            state: false
+        }, {
+            problem: "What clinical condition can occur due to a decrease in albumin levels, leading to fluid leakage from blood vessels into the surrounding tissues?",
+            choices: "Pitting edema/Dehydration/Hypertension/Hypotension/Anemia",
+            answer: "Pitting edema",
+            select: "",
+            state: false
+        }, {
+            problem: "What disease is characterized by the accumulation of oxidized and precipitated hemoglobin within red blood cells, forming inclusion bodies?",
+            choices: "Thalassemia/Gout/Pseudogout/Parkinson's disease/None of the above",
+            answer: "Thalassemia",
+            select: "",
+            state: false
+        }, {
+            problem: "What disease is characterized by the accumulation of monosodium urate (MSU) crystals in joints, leading to inflammation and pain?",
+            choices: "Gout/Thalassemia/Pseudogout/Parkinson's disease/None of the above",
+            answer: "Gout",
+            select: "",
+            state: false
+        }, {
+            problem: "What disease is characterized by the accumulation of calcium pyrophosphate dihydrate (CPPD) crystals in joints?",
+            choices: "Pseudogout/Gout/Thalassemia/Parkinson's disease/None of the above",
+            answer: "Pseudogout",
+            select: "",
+            state: false
+        }, {
+            problem: "What disease is characterized by the accumulation of Lewy bodies, abnormal protein aggregates, in brain cells?",
+            choices: "Parkinson's disease/Gout/Pseudogout/Thalassemia/None of the above",
+            answer: "Parkinson's disease",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of molecules, exemplified by bile salts, can solubilize lipids by forming micelles?",
+            choices: "Amphipathic molecules/Hydrophobic molecules/Hydrophilic molecules/Non-polar molecules/None of the above",
+            answer: "Amphipathic molecules",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the physiological role of the Na-K pump in maintaining osmotic balance?",
+            choices: "Maintain concentration gradients of ions across the cell membrane/Transport glucose into cells/Synthesize ATP/Regulate pH/None of the above",
+            answer: "Maintain concentration gradients of ions across the cell membrane",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the difference between osmolality and osmolarity?",
+            choices: "Osmolality is expressed as osmoles per kilogram of solvent, while osmolarity is expressed as osmoles per liter of solution/Osmolality measures the concentration of all solutes, while osmolarity measures only the concentration of electrolytes/Osmolality is used for clinical measurements, while osmolarity is used for laboratory experiments/None of the above",
+            answer: "Osmolality is expressed as osmoles per kilogram of solvent, while osmolarity is expressed as osmoles per liter of solution",
+            select: "",
+            state: false
+        }, {
+            problem: "What clinical condition is characterized by rapid sodium increase in plasma, leading to brain shrinkage due to water loss?",
+            choices: "Osmotic demyelination/Cerebral edema/Both/Neither",
+            answer: "Osmotic demyelination",
+            select: "",
+            state: false
+        }, {
+            problem: "What clinical condition is characterized by rapid sodium decrease in plasma, leading to brain swelling due to water influx?",
+            choices: "Cerebral edema/Osmotic demyelination/Both/Neither",
+            answer: "Cerebral edema",
+            select: "",
+            state: false
+        }, {
+            problem: "What hormone plays a crucial role in regulating osmolality and water balance in the body?",
+            choices: "Antidiuretic hormone (ADH)/Insulin/Glucagon/Epinephrine/None of the above",
+            answer: "Antidiuretic hormone (ADH)",
+            select: "",
+            state: false
+        }, {
+            problem: "Under what physiological conditions would ADH secretion be stimulated?",
+            choices: "High osmolality or low blood volume/Low osmolality or high blood volume/Normal osmolality and blood volume/None of the above",
+            answer: "High osmolality or low blood volume",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the primary function of ADH in regulating water balance?",
+            choices: "Promote water reabsorption in the kidneys/Increase water excretion in the kidneys/Dilate blood vessels/Constrict blood vessels/None of the above",
+            answer: "Promote water reabsorption in the kidneys",
+            select: "",
+            state: false
+        }, {
+            problem: "What condition, often caused by a lack of ADH, results in excessive urine production and dehydration?",
+            choices: "Diabetes insipidus (DI)/Diabetes mellitus (DM)/Addison's disease/Cushing's syndrome/None of the above",
+            answer: "Diabetes insipidus (DI)",
+            select: "",
+            state: false
+        }, {
+            problem: "Give the three categories of severe dehydration based on the affected fluid compartments.",
+            choices: "1. Mild: Interstitial, 2. Moderate: Interstitial and Intravascular, 3. Severe: Interstitial, Intravascular, and Intracellular/1. Mild: Intracellular, 2. Moderate: Intracellular and Interstitial, 3. Severe: Intracellular, Interstitial, and Intravascular/1. Mild: Intravascular, 2. Moderate: Intravascular and Interstitial, 3. Severe: Intravascular, Interstitial, and Intracellular/None of the above",
+            answer: "1. Mild: Interstitial, 2. Moderate: Interstitial and Intravascular, 3. Severe: Interstitial, Intravascular, and Intracellular",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the normal pH range of blood?",
+            choices: "7.35-7.45/6.8-7.8/4.5-5.5/8.0-9.0/None of the above",
+            answer: "7.35-7.45",
+            select: "",
+            state: false
+        }, {
+            problem: "What two major buffer systems help maintain pH homeostasis in blood?",
+            choices: "Bicarbonate and Histidine/Phosphate and Ammonia/Protein and Hemoglobin/None of the above",
+            answer: "Bicarbonate and Histidine",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the primary organ responsible for regulating bicarbonate levels in the long-term maintenance of acid-base balance?",
+            choices: "Kidneys/Lungs/Liver/Heart/None of the above",
+            answer: "Kidneys",
+            select: "",
+            state: false
+        }, {
+            problem: "What physiological response helps compensate for respiratory acidosis, caused by CO₂ retention?",
+            choices: "Increased renal bicarbonate reabsorption/Increased ventilation/Decreased ventilation/None of the above",
+            answer: "Increased renal bicarbonate reabsorption",
+            select: "",
+            state: false
+        }, {
+            problem: "What acid-base disorder can result from excessive vomiting, leading to the loss of gastric acid?",
+            choices: "Metabolic alkalosis/Metabolic acidosis/Respiratory alkalosis/Respiratory acidosis/None of the above",
+            answer: "Metabolic alkalosis",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of acid-base disorder can occur due to diarrhea, leading to the loss of bicarbonate?",
+            choices: "Metabolic acidosis/Metabolic alkalosis/Respiratory acidosis/Respiratory alkalosis/None of the above",
+            answer: "Metabolic acidosis",
+            select: "",
+            state: false
+        }, {
+            problem: "Give an example of an exogenous acid that can cause metabolic acidosis through ingestion.",
+            choices: "Alcohol (leading to the production of acetic acid)/Lactic acid/Ketoacids/Any of the above/None of the above",
+            answer: "Alcohol (leading to the production of acetic acid)",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of endogenous acids that can cause metabolic acidosis due to increased production during certain metabolic conditions.",
+            choices: "Lactic acid and ketoacids/Carbon dioxide and carbonic acid/Sulfuric acid and phosphoric acid/None of the above",
+            answer: "Lactic acid and ketoacids",
+            select: "",
+            state: false
+        }];
+        var questions2 = [{
+            problem: "What is the general structure of an amino acid?",
+            choices: "Amino group + C + α carboxyl/Carboxyl group + C + α amino group/R group + C + α amino group/Amino group + R group + α carboxyl/None of the above",
+            answer: "Amino group + C + α carboxyl",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the predominant form of amino acids found in proteins?",
+            choices: "L-form/D-form/R-form/S-form/None of the above",
+            answer: "L-form",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the term for an amino acid that carries both a positive and negative charge, resulting in a neutral net charge?",
+            choices: "Zwitterion/Isoelectric point/Amphoteric/Dipole/None of the above",
+            answer: "Zwitterion",
+            select: "",
+            state: false
+        }, {
+            problem: "Which amino acid is classified as an imino acid due to its cyclic structure?",
+            choices: "Proline/Glycine/Alanine/Valine/Leucine",
+            answer: "Proline",
+            select: "",
+            state: false
+        }, {
+            problem: "What color does proline produce in the ninhydrin test?",
+            choices: "Yellow/Purple/Blue/Red/Green",
+            answer: "Yellow",
+            select: "",
+            state: false
+        }, {
+            problem: "Which amino acid exhibits the highest absorbance at 280 nm?",
+            choices: "Phenylalanine/Tyrosine/Tryptophan/Histidine/None of the above",
+            answer: "Phenylalanine",
+            select: "",
+            state: false
+        }, {
+            problem: "What precursor molecule is used for the synthesis of thyroid hormones and catecholamines, such as dopamine, norepinephrine, and epinephrine?",
+            choices: "Tyrosine/Phenylalanine/Tryptophan/Serine/None of the above",
+            answer: "Tyrosine",
+            select: "",
+            state: false
+        }, {
+            problem: "Which amino acid is a precursor for serotonin and melatonin, neurotransmitters involved in regulating sleep and mood?",
+            choices: "Tryptophan/Tyrosine/Phenylalanine/Glycine/None of the above",
+            answer: "Tryptophan",
+            select: "",
+            state: false
+        }, {
+            problem: "Which amino acid is involved in the formation of disulfide bonds, linking polypeptide chains or stabilizing protein structures?",
+            choices: "Cysteine/Methionine/Serine/Threonine/None of the above",
+            answer: "Cysteine",
+            select: "",
+            state: false
+        }, {
+            problem: "Which two amino acids carry a positive charge at physiological pH?",
+            choices: "Lysine and Arginine/Histidine and Aspartate/Glutamate and Glutamine/Asparagine and Serine/None of the above",
+            answer: "Lysine and Arginine",
+            select: "",
+            state: false
+        }, {
+            problem: "Which amino acid is synthesized in the urea cycle and plays a crucial role in nitrogen metabolism?",
+            choices: "Arginine/Lysine/Histidine/Ornithine/None of the above",
+            answer: "Arginine",
+            select: "",
+            state: false
+        }, {
+            problem: "Which amino acid acts as a buffer in blood and has a pKa of approximately 6?",
+            choices: "Histidine/Lysine/Arginine/Aspartate/Glutamate",
+            answer: "Histidine",
+            select: "",
+            state: false
+        }, {
+            problem: "Which two amino acids carry a negative charge at physiological pH?",
+            choices: "Aspartate and Glutamate/Lysine and Arginine/Histidine and Asparagine/Serine and Threonine/None of the above",
+            answer: "Aspartate and Glutamate",
+            select: "",
+            state: false
+        }, {
+            problem: "Which two modified amino acids are important for collagen crosslinking?",
+            choices: "Hydroxyproline and Hydroxylysine/Proline and Lysine/Serine and Threonine/Cysteine and Methionine/None of the above",
+            answer: "Hydroxyproline and Hydroxylysine",
+            select: "",
+            state: false
+        }, {
+            problem: "What vitamin is essential for the formation of hydroxyproline and hydroxylysine in collagen synthesis?",
+            choices: "Vitamin C/Vitamin D/Vitamin K/Vitamin A/None of the above",
+            answer: "Vitamin C",
+            select: "",
+            state: false
+        }, {
+            problem: "What condition results from vitamin C deficiency, leading to impaired collagen synthesis and symptoms like bleeding gums and petechiae?",
+            choices: "Scurvy/Rickets/Pellagra/Beriberi/None of the above",
+            answer: "Scurvy",
+            select: "",
+            state: false
+        }, {
+            problem: "Which essential amino acids can be remembered by the mnemonic PVT TIM HALL?",
+            choices: "Phenylalanine, Valine, Threonine, Tryptophan, Isoleucine, Methionine, Histidine, Arginine, Leucine, Lysine/Glycine, Alanine, Serine, Cysteine, Asparagine, Glutamine, Proline, Tyrosine, Aspartate, Glutamate/All amino acids are essential/None of the above",
+            answer: "Phenylalanine, Valine, Threonine, Tryptophan, Isoleucine, Methionine, Histidine, Arginine, Leucine, Lysine",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of peptide, found in red blood cells, contains iron and is responsible for oxygen transport?",
+            choices: "Hemoprotein/Glycoprotein/Lipoprotein/Phosphopeptide/None of the above",
+            answer: "Hemoprotein",
+            select: "",
+            state: false
+        }, {
+            problem: "What small peptide acts as an antioxidant, protecting cells from oxidative damage?",
+            choices: "Glutathione/Aspartame/Insulin/Glucagon/None of the above",
+            answer: "Glutathione",
+            select: "",
+            state: false
+        }, {
+            problem: "What artificial sweetener is composed of two amino acids, aspartic acid and phenylalanine, linked by a peptide bond?",
+            choices: "Aspartame/Saccharin/Sucralose/Stevia/None of the above",
+            answer: "Aspartame",
+            select: "",
+            state: false
+        }, {
+            problem: "What metabolic disorder can result from a deficiency in the enzyme phenylalanine hydroxylase (PAH), leading to the accumulation of phenylalanine and potential intellectual disability?",
+            choices: "Phenylketonuria (PKU)/Albinism/Tyrosinemia/Homocystinuria/None of the above",
+            answer: "Phenylketonuria (PKU)",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the two common secondary structures found in proteins, formed by hydrogen bonding between the backbone atoms?",
+            choices: "Alpha-Helix and Beta-pleated sheet/Random coil and Beta-turn/Tertiary structure and Quaternary structure/None of the above",
+            answer: "Alpha-Helix and Beta-pleated sheet",
+            select: "",
+            state: false
+        }, {
+            problem: "Which level of protein structure describes the three-dimensional arrangement of amino acids in a polypeptide chain, stabilized by various interactions, including disulfide bonds?",
+            choices: "Tertiary structure/Primary structure/Secondary structure/Quaternary structure/None of the above",
+            answer: "Tertiary structure",
+            select: "",
+            state: false
+        }, {
+            problem: "Which level of protein structure describes the arrangement of multiple polypeptide chains (subunits) in a protein complex?",
+            choices: "Quaternary structure/Primary structure/Secondary structure/Tertiary structure/None of the above",
+            answer: "Quaternary structure",
+            select: "",
+            state: false
+        }, {
+            problem: "What are two factors that assist in protein folding, ensuring proper three-dimensional structure?",
+            choices: "R group interactions and chaperone proteins/pH and temperature/Salt concentration and denaturants/None of the above",
+            answer: "R group interactions and chaperone proteins",
+            select: "",
+            state: false
+        }, {
+            problem: "What protein aggregates, misfolded prion proteins (PrPSc), are associated with neurodegenerative diseases like Creutzfeldt-Jakob disease?",
+            choices: "Amyloid plaques/Lewy bodies/Tau tangles/None of the above",
+            answer: "Amyloid plaques",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the term for the loss of a protein's three-dimensional structure, often resulting in a loss of function?",
+            choices: "Denaturation/Hydrolysis/Oxidation/Reduction/None of the above",
+            answer: "Denaturation",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three examples of factors that can cause protein denaturation.",
+            choices: "Heat, Detergent, Salt/pH, Cold, Radiation/Pressure, Light, Sound/None of the above",
+            answer: "Heat, Detergent, Salt",
+            select: "",
+            state: false
+        }];
+        var questions3 = [{
+            problem: "What three elements make up carbohydrates?",
+            choices: "Carbon, Hydrogen, and Oxygen/Carbon, Hydrogen, and Nitrogen/Carbon, Oxygen, and Nitrogen/Hydrogen, Oxygen, and Nitrogen/None of the above",
+            answer: "Carbon, Hydrogen, and Oxygen",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the simplest aldose sugar and what is its corresponding ketose isomer?",
+            choices: "D-Glyceraldehyde (aldose) and Dihydroxyacetone (ketose)/Glucose (aldose) and Fructose (ketose)/Ribose (aldose) and Xylulose (ketose)/Galactose (aldose) and Tagatose (ketose)/None of the above",
+            answer: "D-Glyceraldehyde (aldose) and Dihydroxyacetone (ketose)",
+            select: "",
+            state: false
+        }, {
+            problem: "How do epimers differ in their chemical structure?",
+            choices: "They differ in the configuration of only one chiral carbon/They differ in the configuration of all chiral carbons/They are mirror images of each other/They have different functional groups/None of the above",
+            answer: "They differ in the configuration of only one chiral carbon",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the key structural feature that distinguishes alpha and beta anomers of a sugar?",
+            choices: "The orientation of the hydroxyl group on the anomeric carbon/The number of carbon atoms in the sugar molecule/The position of the carbonyl group/The presence or absence of a ring structure/None of the above",
+            answer: "The orientation of the hydroxyl group on the anomeric carbon",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the term for the interconversion between alpha and beta anomers of a sugar in solution?",
+            choices: "Mutarotation/Epimerization/Anomerization/Isomerization/None of the above",
+            answer: "Mutarotation",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main type of sugar found in milk?",
+            choices: "Galactose/Glucose/Fructose/Lactose/Mannose",
+            answer: "Lactose",
+            select: "",
+            state: false
+        }, {
+            problem: "Which monosaccharide is commonly used in PET scans to detect cancer?",
+            choices: "Glucose labeled with 18-FDG (fluorodeoxyglucose)/Fructose/Galactose/Mannose/Ribose",
+            answer: "Glucose labeled with 18-FDG (fluorodeoxyglucose)",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the product of glucuronate detoxification?",
+            choices: "Glucuronide/Glucuronic acid/Glycogen/Starch/None of the above",
+            answer: "Glucuronide",
+            select: "",
+            state: false
+        }, {
+            problem: "Which disaccharide is composed of glucose and fructose units?",
+            choices: "Sucrose/Lactose/Maltose/Trehalose/None of the above",
+            answer: "Sucrose",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the type of glycosidic bond found in lactose?",
+            choices: "Beta-1,4/Alpha-1,4/Alpha-1,6/Beta-1,3/None of the above",
+            answer: "Beta-1,4",
+            select: "",
+            state: false
+        }, {
+            problem: "Which disaccharide is non-reducing, meaning it does not react with Benedict's reagent?",
+            choices: "Sucrose/Maltose/Lactose/All of the above/None of the above",
+            answer: "Sucrose",
+            select: "",
+            state: false
+        }, {
+            problem: "What condition results from a deficiency in the enzyme lactase, leading to the inability to digest lactose?",
+            choices: "Lactose intolerance/Diabetes mellitus/Galactosemia/Fructose intolerance/None of the above",
+            answer: "Lactose intolerance",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three symptoms that may indicate lactose intolerance.",
+            choices: "Bloating, diarrhea, and pain in the lower belly/Nausea, vomiting, and headache/Constipation, abdominal cramping, and fever/None of the above",
+            answer: "Bloating, diarrhea, and pain in the lower belly",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of polysaccharide consists of linear chains of glucose units linked by alpha-1,4-glycosidic bonds?",
+            choices: "Amylose/Amylopectin/Glycogen/Cellulose/None of the above",
+            answer: "Amylose",
+            select: "",
+            state: false
+        }, {
+            problem: "Which polysaccharide serves as the primary storage form of glucose in animals?",
+            choices: "Glycogen/Amylose/Amylopectin/Cellulose/None of the above",
+            answer: "Glycogen",
+            select: "",
+            state: false
+        }, {
+            problem: "Which polysaccharide, composed of glucose units linked by beta-1,4-glycosidic bonds, is the main structural component of plant cell walls?",
+            choices: "Cellulose/Amylose/Amylopectin/Glycogen/None of the above",
+            answer: "Cellulose",
+            select: "",
+            state: false
+        }, {
+            problem: "Which polysaccharide, consisting of linear chains of N-acetylglucosamine units, forms the exoskeletons of arthropods?",
+            choices: "Chitin/Amylose/Amylopectin/Glycogen/None of the above",
+            answer: "Chitin",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the two building blocks of glycosaminoglycans (GAGs)?",
+            choices: "Glucuronic acid and N-acetylglucosamine/Glucose and Fructose/Galactose and Mannose/Ribose and Deoxyribose/None of the above",
+            answer: "Glucuronic acid and N-acetylglucosamine",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of glycosaminoglycan (GAG) is found in synovial fluid and vitreous humor?",
+            choices: "Hyaluronic acid/Chondroitin/Heparin/Keratan sulfate/None of the above",
+            answer: "Hyaluronic acid",
+            select: "",
+            state: false
+        }, {
+            problem: "What glycosaminoglycan (GAG) is a potent anticoagulant?",
+            choices: "Heparin/Hyaluronic acid/Chondroitin/Keratan sulfate/None of the above",
+            answer: "Heparin",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main function of proteoglycans in the extracellular matrix (ECM)?",
+            choices: "Provide structural support, hydration, and regulate cellular functions/Catalyze biochemical reactions/Transport molecules across membranes/Store energy/None of the above",
+            answer: "Provide structural support, hydration, and regulate cellular functions",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main structural component of bacterial cell walls?",
+            choices: "Peptidoglycan/Cellulose/Chitin/Starch/None of the above",
+            answer: "Peptidoglycan",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two amino acids to which carbohydrates are linked to form glycoproteins.",
+            choices: "Asparagine and Serine/Cysteine and Methionine/Lysine and Arginine/Glutamate and Glutamine/None of the above",
+            answer: "Asparagine and Serine",
+            select: "",
+            state: false
+        }, {
+            problem: "Give an example of an artificial sweetener that is a modified form of sucrose and does not provide any energy.",
+            choices: "Sucralose/Stevioside/Aspartame/Saccharin/None of the above",
+            answer: "Sucralose",
+            select: "",
+            state: false
+        }, {
+            problem: "Give an example of an artificial sweetener that is derived from stevia leaves and does not provide any energy.",
+            choices: "Stevioside/Sucralose/Aspartame/Saccharin/None of the above",
+            answer: "Stevioside",
+            select: "",
+            state: false
+        }, {
+            problem: "What lipid and sugar components are part of gangliosides, playing a role in cell signaling and ion channel function?",
+            choices: "Ceramide and oligosacharide (NANA)/Glycerol and fatty acids/Cholesterol and phospholipids/None of the above",
+            answer: "Ceramide and oligosacharide (NANA)",
+            select: "",
+            state: false
+        }];
+        var questions4 = [{
+            problem: "What is the basic structure of a fatty acid (FA)?",
+            choices: "COOH + R chain/CH3 + R chain/CHO + R chain/OH + R chain/NH2 + R chain",
+            answer: "COOH + R chain",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the structural difference between saturated and unsaturated fatty acids?",
+            choices: "Saturated fatty acids have no double bonds in their hydrocarbon chains, while unsaturated fatty acids have one or more double bonds/Saturated fatty acids have shorter hydrocarbon chains than unsaturated fatty acids/Saturated fatty acids are liquid at room temperature, while unsaturated fatty acids are solid/Saturated fatty acids have higher melting points than unsaturated fatty acids/None of the above",
+            answer: "Saturated fatty acids have no double bonds in their hydrocarbon chains, while unsaturated fatty acids have one or more double bonds",
+            select: "",
+            state: false
+        }, {
+            problem: "How does the length of a fatty acid's hydrocarbon chain affect its melting point (MP)?",
+            choices: "Longer chains have higher MPs/Shorter chains have higher MPs/Chain length has no effect on MP/The relationship between chain length and MP depends on the saturation of the fatty acid/None of the above",
+            answer: "Longer chains have higher MPs",
+            select: "",
+            state: false
+        }, {
+            problem: "How does the degree of unsaturation affect a fatty acid's melting point?",
+            choices: "Increased unsaturation lowers MP/Increased saturation lowers MP/Unsaturation has no effect on MP/The relationship between unsaturation and MP depends on the chain length of the fatty acid/None of the above",
+            answer: "Increased unsaturation lowers MP",
+            select: "",
+            state: false
+        }, {
+            problem: "In the delta (Δ) system of fatty acid nomenclature, from what group is the position of the first double bond counted?",
+            choices: "The carboxyl group (COOH)/The methyl group (CH3) at the end of the hydrocarbon chain/The center of the hydrocarbon chain/Any carbon in the hydrocarbon chain/None of the above",
+            answer: "The carboxyl group (COOH)",
+            select: "",
+            state: false
+        }, {
+            problem: "In the omega (ω) system of fatty acid nomenclature, from what group is the position of the first double bond counted?",
+            choices: "The methyl group (CH3) at the end of the hydrocarbon chain/The carboxyl group (COOH)/The center of the hydrocarbon chain/Any carbon in the hydrocarbon chain/None of the above",
+            answer: "The methyl group (CH3) at the end of the hydrocarbon chain",
+            select: "",
+            state: false
+        }, {
+            problem: "How do you determine the systematic name of a fatty acid with multiple double bonds?",
+            choices: "Add the appropriate prefixes for the number of double bonds and indicate their positions using the delta (Δ) system, followed by 'aenoic acid'/Use the common name of the fatty acid followed by the number of double bonds and their positions using the omega (ω) system/There is no systematic naming convention for polyunsaturated fatty acids/None of the above",
+            answer: "Add the appropriate prefixes for the number of double bonds and indicate their positions using the delta (Δ) system, followed by 'aenoic acid'",
+            select: "",
+            state: false
+        }, {
+            problem: "What are two key characteristics of essential fatty acids?",
+            choices: "Humans cannot synthesize them and they have carbon chains less than or equal to 20/Humans can synthesize them and they are primarily found in animal fats/They are precursors for cholesterol and are soluble in water/They have no structural role in the body and are not involved in any metabolic reactions/None of the above",
+            answer: "Humans cannot synthesize them and they have carbon chains less than or equal to 20",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main dietary source of essential fatty acids?",
+            choices: "Fish and plants/Red meat and poultry/Dairy products and eggs/Grains and legumes/None of the above",
+            answer: "Fish and plants",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three examples of omega-3 fatty acids.",
+            choices: "ALA (alpha-linolenic acid), EPA (eicosapentaenoic acid), and DHA (docosahexaenoic acid)/Linoleic acid, gamma-linolenic acid, and arachidonic acid/Oleic acid, stearic acid, and palmitic acid/None of the above",
+            answer: "ALA (alpha-linolenic acid), EPA (eicosapentaenoic acid), and DHA (docosahexaenoic acid)",
+            select: "",
+            state: false
+        }, {
+            problem: "What potential health benefits are associated with omega-3 fatty acids?",
+            choices: "Reduced risk of liver cancer, slowing Alzheimer's disease progression, and reduced inflammation/Increased risk of heart disease, stroke, and blood clots/Elevated blood pressure and increased risk of hypertension/No known health benefits or risks associated with omega-3 fatty acids/None of the above",
+            answer: "Reduced risk of liver cancer, slowing Alzheimer's disease progression, and reduced inflammation",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the precursor for eicosanoids, signaling molecules involved in regulating blood pressure and inflammation?",
+            choices: "Arachidonic acid, an omega-6 fatty acid/ALA, EPA, DHA (omega-3 fatty acids)/Linoleic acid/None of the above",
+            answer: "Arachidonic acid, an omega-6 fatty acid",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three examples of eicosanoids.",
+            choices: "Prostaglandins, thromboxanes, and leukotrienes/Cholesterol, bile acids, and steroid hormones/Phospholipids, sphingolipids, and glycolipids/Triglycerides, waxes, and terpenes/None of the above",
+            answer: "Prostaglandins, thromboxanes, and leukotrienes",
+            select: "",
+            state: false
+        }, {
+            problem: "What process involves the reaction of unsaturated fatty acids with hydrogen gas in the presence of a catalyst (usually nickel), resulting in the conversion of double bonds to single bonds?",
+            choices: "Hydrogenation/Oxidation/Saponification/Esterification/None of the above",
+            answer: "Hydrogenation",
+            select: "",
+            state: false
+        }, {
+            problem: "What food product is made through hydrogenation, aiming to solidify liquid oils and improve their shelf life?",
+            choices: "Margarine/Butter/Vegetable oil/Shortening/None of the above",
+            answer: "Margarine",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the negative health consequence of incomplete hydrogenation, which produces trans fatty acids?",
+            choices: "Increased LDL cholesterol, decreased HDL cholesterol, and increased risk of coronary heart disease/Decreased risk of cancer and improved immune function/Lower blood pressure and reduced inflammation/No known negative health consequences associated with trans fatty acids/None of the above",
+            answer: "Increased LDL cholesterol, decreased HDL cholesterol, and increased risk of coronary heart disease",
+            select: "",
+            state: false
+        }, {
+            problem: "What process involves the alkaline hydrolysis of fats and oils, producing soap and glycerol?",
+            choices: "Saponification/Hydrogenation/Oxidation/Esterification/None of the above",
+            answer: "Saponification",
+            select: "",
+            state: false
+        }, {
+            problem: "What process forms esters, often involving the reaction of fatty acids with alcohols?",
+            choices: "Esterification/Saponification/Hydrogenation/Oxidation/None of the above",
+            answer: "Esterification",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of lipid is formed through esterification, characterized by its water-repellent properties?",
+            choices: "Wax/Triglyceride/Phospholipid/Sphingolipid/None of the above",
+            answer: "Wax",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two natural examples of waxes and their functions.",
+            choices: "Beeswax (protective coating for honeycombs) and coating on bird feathers (water repellency)/Cholesterol (membrane fluidity) and steroid hormones (signaling)/Prostaglandins (inflammation) and thromboxanes (blood clotting)/None of the above",
+            answer: "Beeswax (protective coating for honeycombs) and coating on bird feathers (water repellency)",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the structural components of a triglyceride (TAG or TG)?",
+            choices: "Glycerol and three fatty acids/Sphingosine and a fatty acid/Glycerol, two fatty acids, a phosphate group, and a polar head group/Cholesterol and fatty acid esters/None of the above",
+            answer: "Glycerol and three fatty acids",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of cells in adipose tissue store triglycerides?",
+            choices: "Adipocytes/Hepatocytes/Myocytes/Neurons/None of the above",
+            answer: "Adipocytes",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the structural components of a phospholipid?",
+            choices: "Glycerol, two fatty acids, a phosphate group, and a polar head group/Sphingosine and a fatty acid/Glycerol and three fatty acids/Cholesterol and fatty acid esters/None of the above",
+            answer: "Glycerol, two fatty acids, a phosphate group, and a polar head group",
+            select: "",
+            state: false
+        }, {
+            problem: "What artificial structures are composed of phospholipid bilayers and are commonly used in drug delivery?",
+            choices: "Liposomes/Micelles/Vesicles/None of the above",
+            answer: "Liposomes",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three examples of natural structures or substances where phospholipids play crucial roles.",
+            choices: "Biological membranes, lung surfactant, and emulsifiers in bile/Cholesterol, steroid hormones, and vitamin D/Prostaglandins, thromboxanes, and leukotrienes/Triglycerides, waxes, and terpenes/None of the above",
+            answer: "Biological membranes, lung surfactant, and emulsifiers in bile",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the structural components of a sphingolipid?",
+            choices: "Sphingosine, a fatty acid, a phosphate group, and a polar head group/Glycerol, two fatty acids, a phosphate group, and a polar head group/Glycerol and three fatty acids/Cholesterol and fatty acid esters/None of the above",
+            answer: "Sphingosine, a fatty acid, a phosphate group, and a polar head group",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main function of sphingomyelin, a type of sphingolipid?",
+            choices: "Forms the myelin sheath, insulating nerve fibers and facilitating nerve impulse transmission/Provides structural support to cell membranes/Regulates membrane fluidity/Acts as a precursor for steroid hormones/None of the above",
+            answer: "Forms the myelin sheath, insulating nerve fibers and facilitating nerve impulse transmission",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of lipids are responsible for ABO blood group antigens found on cell membranes?",
+            choices: "Glycolipids/Phospholipids/Sphingolipids/Cholesterol/None of the above",
+            answer: "Glycolipids",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the major components of glycosphingolipids?",
+            choices: "Sphingosine, a fatty acid, and a carbohydrate/Glycerol, two fatty acids, and a phosphate group/Glycerol and three fatty acids/Cholesterol and fatty acid esters/None of the above",
+            answer: "Sphingosine, a fatty acid, and a carbohydrate",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main function of lipoproteins?",
+            choices: "Transport lipids in the bloodstream/Store energy in adipose tissue/Insulate nerve fibers/Provide structural support to cell membranes/None of the above",
+            answer: "Transport lipids in the bloodstream",
+            select: "",
+            state: false
+        }, {
+            problem: "What lipoprotein carries dietary fats (exogenous lipids) from the small intestine to cells?",
+            choices: "Chylomicron/VLDL/LDL/HDL/None of the above",
+            answer: "Chylomicron",
+            select: "",
+            state: false
+        }, {
+            problem: "What lipoprotein is responsible for transporting endogenous lipids from the liver to cells?",
+            choices: "VLDL (very low-density lipoprotein)/Chylomicron/LDL/HDL/None of the above",
+            answer: "VLDL (very low-density lipoprotein)",
+            select: "",
+            state: false
+        }, {
+            problem: "What lipoprotein, considered 'bad' cholesterol, delivers cholesterol from the liver to cells and can contribute to plaque buildup in arteries?",
+            choices: "LDL (low-density lipoprotein)/HDL/Chylomicron/VLDL/None of the above",
+            answer: "LDL (low-density lipoprotein)",
+            select: "",
+            state: false
+        }, {
+            problem: "What lipoprotein, considered 'good' cholesterol, removes excess cholesterol from cells and transports it back to the liver?",
+            choices: "HDL (high-density lipoprotein)/LDL/Chylomicron/VLDL/None of the above",
+            answer: "HDL (high-density lipoprotein)",
+            select: "",
+            state: false
+        }, {
+            problem: "What are apoproteins, found in lipoproteins?",
+            choices: "Proteins that bind and stabilize lipids, act as ligands for receptors, and regulate enzyme activity/Carbohydrates that attach to lipids/Enzymes that break down lipids/None of the above",
+            answer: "Proteins that bind and stabilize lipids, act as ligands for receptors, and regulate enzyme activity",
+            select: "",
+            state: false
+        }, {
+            problem: "Give an example of a steroid that is crucial for maintaining membrane fluidity?",
+            choices: "Cholesterol/Testosterone/Estradiol/Cortisol/Aldosterone",
+            answer: "Cholesterol",
+            select: "",
+            state: false
+        }, {
+            problem: "What precursor molecule, found in certain fungi, can be converted to vitamin D2 upon exposure to ultraviolet (UV) light?",
+            choices: "Ergosterol/Cholesterol/7-Dehydrocholesterol/None of the above",
+            answer: "Ergosterol",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three examples of eicosanoids and their functions.",
+            choices: "Prostaglandins (regulate inflammation and blood pressure), Thromboxanes (involved in blood clotting), and Leukotrienes (regulate inflammation and involved in asthma)/Cholesterol, ergosterol, and vitamin D/Triglycerides, waxes, and terpenes/None of the above",
+            answer: "Prostaglandins (regulate inflammation and blood pressure), Thromboxanes (involved in blood clotting), and Leukotrienes (regulate inflammation and involved in asthma)",
+            select: "",
+            state: false
+        }, {
+            problem: "What essential fatty acid is a precursor for arachidonic acid, the precursor for many eicosanoids?",
+            choices: "Linoleic acid/Alpha-linolenic acid/Arachidonic acid itself is an essential fatty acid/None of the above",
+            answer: "Linoleic acid",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the basic structural unit of terpenes, often associated with characteristic aromas and flavors?",
+            choices: "Isoprene/Glucose/Glycerol/Amino acids/None of the above",
+            answer: "Isoprene",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three vitamins that have antioxidant properties, protecting against oxidative damage, in addition to their coenzyme functions.",
+            choices: "Vitamins A, E, and K/Vitamins B1, B2, and B3/Vitamins B6, B12, and Folate/None of the above",
+            answer: "Vitamins A, E, and K",
+            select: "",
+            state: false
+        }, {
+            problem: "What vitamin, known as tocopherol, acts as a potent antioxidant, protecting cell membranes from lipid peroxidation?",
+            choices: "Vitamin E/Vitamin A/Vitamin K/Coenzyme Q10/None of the above",
+            answer: "Vitamin E",
+            select: "",
+            state: false
+        }];
+        var questions5 = [{
+            problem: "What are the two main components that make up a nucleotide?",
+            choices: "Nucleoside and Phosphate group/Sugar and Nitrogenous base/Ribose and Deoxyribose/Purine and Pyrimidine/None of the above",
+            answer: "Nucleoside and Phosphate group",
+            select: "",
+            state: false
+        }, {
+            problem: "What distinguishes ribose from deoxyribose?",
+            choices: "Deoxyribose lacks an oxygen atom on the second carbon (C2)/Ribose has a six-carbon ring while deoxyribose has a five-carbon ring/Deoxyribose is found in DNA, while ribose is found in RNA/Deoxyribose has an additional hydroxyl group compared to ribose/None of the above",
+            answer: "Deoxyribose lacks an oxygen atom on the second carbon (C2)",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of bond links a nitrogenous base to a sugar in a nucleoside?",
+            choices: "β-glycosidic bond/Phosphodiester bond/Hydrogen bond/Peptide bond/None of the above",
+            answer: "β-glycosidic bond",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of bond links a phosphate group to a sugar in a nucleotide?",
+            choices: "Phosphoester bond/Glycosidic bond/Hydrogen bond/Ionic bond/None of the above",
+            answer: "Phosphoester bond",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the two major classes of nitrogenous bases found in nucleotides?",
+            choices: "Purines and Pyrimidines/Ribose and Deoxyribose/Adenine and Guanine/Cytosine and Thymine/None of the above",
+            answer: "Purines and Pyrimidines",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of purine bases.",
+            choices: "Adenine and Guanine/Cytosine and Thymine/Uracil and Thymine/Adenine and Thymine/None of the above",
+            answer: "Adenine and Guanine",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three examples of pyrimidine bases.",
+            choices: "Cytosine, Thymine, and Uracil/Adenine, Guanine, and Cytosine/Adenine, Thymine, and Uracil/Guanine, Cytosine, and Thymine/None of the above",
+            answer: "Cytosine, Thymine, and Uracil",
+            select: "",
+            state: false
+        }, {
+            problem: "Which pyrimidine base is found in RNA but not in DNA?",
+            choices: "Uracil/Thymine/Cytosine/All are found in both DNA and RNA/None of the above",
+            answer: "Uracil",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of nucleotides that serve as energy carriers in cells.",
+            choices: "ATP (adenosine triphosphate) and GTP (guanosine triphosphate)/cAMP (cyclic adenosine monophosphate) and cGMP (cyclic guanosine monophosphate)/FAD (flavin adenine dinucleotide) and NAD+ (nicotinamide adenine dinucleotide)/Coenzyme A and Acetyl-CoA/None of the above",
+            answer: "ATP (adenosine triphosphate) and GTP (guanosine triphosphate)",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of cyclic nucleotides that act as second messengers in signal transduction pathways.",
+            choices: "cAMP (cyclic adenosine monophosphate) and cGMP (cyclic guanosine monophosphate)/ATP (adenosine triphosphate) and GTP (guanosine triphosphate)/FAD (flavin adenine dinucleotide) and NAD+ (nicotinamide adenine dinucleotide)/Coenzyme A and Acetyl-CoA/None of the above",
+            answer: "cAMP (cyclic adenosine monophosphate) and cGMP (cyclic guanosine monophosphate)",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of coenzymes that contain nucleotides as part of their structure.",
+            choices: "FAD (flavin adenine dinucleotide) and NAD+ (nicotinamide adenine dinucleotide)/ATP (adenosine triphosphate) and GTP (guanosine triphosphate)/cAMP (cyclic adenosine monophosphate) and cGMP (cyclic guanosine monophosphate)/Coenzyme A and Acetyl-CoA/None of the above",
+            answer: "FAD (flavin adenine dinucleotide) and NAD+ (nicotinamide adenine dinucleotide)",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of bond links nucleotides together to form polynucleotides like DNA and RNA?",
+            choices: "Phosphodiester bond/Glycosidic bond/Hydrogen bond/Peptide bond/None of the above",
+            answer: "Phosphodiester bond",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the term for the release of a pyrophosphate (PPi) molecule during the addition of a nucleotide to a growing polynucleotide chain?",
+            choices: "Pyrophosphate release/Dephosphorylation/Hydrolysis/Condensation/None of the above",
+            answer: "Pyrophosphate release",
+            select: "",
+            state: false
+        }, {
+            problem: "According to the Watson and Crick model, how are the two strands of DNA oriented with respect to each other?",
+            choices: "Antiparallel/Parallel/Perpendicular/Random/None of the above",
+            answer: "Antiparallel",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the base pairing rules for DNA?",
+            choices: "Adenine (A) pairs with Thymine (T), and Guanine (G) pairs with Cytosine (C)/Adenine (A) pairs with Guanine (G), and Cytosine (C) pairs with Thymine (T)/Adenine (A) pairs with Cytosine (C), and Guanine (G) pairs with Thymine (T)/There are no specific base pairing rules/None of the above",
+            answer: "Adenine (A) pairs with Thymine (T), and Guanine (G) pairs with Cytosine (C)",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the directionality of a DNA strand?",
+            choices: "5' to 3'/3' to 5'/N-terminus to C-terminus/Positive to Negative/None of the above",
+            answer: "5' to 3'",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the approximate distance spanned by one complete turn of the DNA double helix?",
+            choices: "3.4 nm/2.0 nm/10.0 nm/0.34 nm/None of the above",
+            answer: "3.4 nm",
+            select: "",
+            state: false
+        }, {
+            problem: "How many base pairs are typically found in one complete turn of the DNA double helix?",
+            choices: "10 base pairs/20 base pairs/5 base pairs/34 base pairs/None of the above",
+            answer: "10 base pairs",
+            select: "",
+            state: false
+        }, {
+            problem: "What principle, proposed by Erwin Chargaff, states that the amount of adenine (A) in DNA equals the amount of thymine (T), and the amount of guanine (G) equals the amount of cytosine (C)?",
+            choices: "Chargaff's rules/Watson-Crick base pairing/DNA double helix structure/None of the above",
+            answer: "Chargaff's rules",
+            select: "",
+            state: false
+        }, {
+            problem: "What term describes the separation of the two strands of the DNA double helix, either by heat or other denaturing agents?",
+            choices: "Denaturation/Replication/Transcription/Translation/None of the above",
+            answer: "Denaturation",
+            select: "",
+            state: false
+        }, {
+            problem: "At what wavelength does DNA absorb UV light maximally?",
+            choices: "260 nm/280 nm/320 nm/200 nm/None of the above",
+            answer: "260 nm",
+            select: "",
+            state: false
+        }, {
+            problem: "What term describes the increase in absorbance at 260 nm that occurs when DNA is denatured?",
+            choices: "Hyperchromism/Hypochromism/Isochromism/Bathochromic shift/None of the above",
+            answer: "Hyperchromism",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the melting temperature (Tm) of DNA?",
+            choices: "The temperature at which 50% of the DNA strands are separated/The temperature at which DNA begins to denature/The temperature at which DNA is completely denatured/None of the above",
+            answer: "The temperature at which 50% of the DNA strands are separated",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the basic structural unit of chromatin, consisting of DNA wrapped around a core of histone proteins?",
+            choices: "Nucleosome/Chromosome/Chromatid/Centromere/None of the above",
+            answer: "Nucleosome",
+            select: "",
+            state: false
+        }, {
+            problem: "How many histone proteins make up the core of a nucleosome?",
+            choices: "Eight (two copies each of H2A, H2B, H3, and H4)/Four (one copy each of H2A, H2B, H3, and H4)/One (H1)/Six (two copies each of H2A, H2B, and H3)/None of the above",
+            answer: "Eight (two copies each of H2A, H2B, H3, and H4)",
+            select: "",
+            state: false
+        }, {
+            problem: "Which two amino acids are abundant in histone proteins, contributing to their positive charge?",
+            choices: "Lysine and Arginine/Histidine and Aspartate/Glutamate and Asparagine/Serine and Threonine/None of the above",
+            answer: "Lysine and Arginine",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of chromatin is densely packed and transcriptionally inactive?",
+            choices: "Heterochromatin/Euchromatin",
+            answer: "Heterochromatin",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of chromatin is loosely packed and transcriptionally active, containing most actively expressed genes?",
+            choices: "Euchromatin/Heterochromatin",
+            answer: "Euchromatin",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main structural difference between DNA and RNA?",
+            choices: "DNA is double-stranded, while RNA is usually single-stranded/DNA contains thymine, while RNA contains uracil/DNA has a deoxyribose sugar, while RNA has a ribose sugar/All of the above/None of the above",
+            answer: "All of the above",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of RNA molecule carries the genetic information from DNA to the ribosomes for protein synthesis?",
+            choices: "Messenger RNA (mRNA)/Transfer RNA (tRNA)/Ribosomal RNA (rRNA)/Small nuclear RNA (snRNA)/None of the above",
+            answer: "Messenger RNA (mRNA)",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of RNA molecule carries amino acids to the ribosomes during protein synthesis, matching them to the codons on mRNA?",
+            choices: "Transfer RNA (tRNA)/Messenger RNA (mRNA)/Ribosomal RNA (rRNA)/Small nuclear RNA (snRNA)/None of the above",
+            answer: "Transfer RNA (tRNA)",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of RNA molecule forms the structural and catalytic core of ribosomes, where protein synthesis takes place?",
+            choices: "Ribosomal RNA (rRNA)/Messenger RNA (mRNA)/Transfer RNA (tRNA)/Small nuclear RNA (snRNA)/None of the above",
+            answer: "Ribosomal RNA (rRNA)",
+            select: "",
+            state: false
+        }];
+        var questions6 = [{
+            problem: "What cellular structures, besides the plasma membrane, also contain a lipid bilayer?",
+            choices: "Mitochondria and Nucleus/Golgi apparatus and Endoplasmic reticulum/Lysosomes and Peroxisomes/Ribosomes and Centrosomes/None of the above",
+            answer: "Mitochondria and Nucleus",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the name of the model that describes the fluid nature of the lipid bilayer with embedded proteins and asymmetrical distribution?",
+            choices: "Mosaic Model/Fluid Mosaic Model/Singer-Nicolson Model/Robertson Model/Davson-Danielli Model",
+            answer: "Mosaic Model",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of endoplasmic reticulum (ER) is involved in lipid and carbohydrate synthesis and detoxification?",
+            choices: "Smooth ER (SER)/Rough ER (RER)",
+            answer: "Smooth ER (SER)",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the primary function of the rough ER (RER)?",
+            choices: "Protein synthesis/Lipid synthesis/Detoxification/Calcium storage/None of the above",
+            answer: "Protein synthesis",
+            select: "",
+            state: false
+        }, {
+            problem: "How are newly synthesized proteins and lipids transported from the ER to their target organelles?",
+            choices: "Via vesicles/Directly through membrane channels/Diffusion through the cytoplasm/Active transport along microtubules/None of the above",
+            answer: "Via vesicles",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three main functions of biological membranes.",
+            choices: "Selective Permeability, Cell Signaling, and Cellular Trafficking/Energy Production, Protein Synthesis, and DNA Replication/Waste Disposal, Cell Division, and Movement/None of the above",
+            answer: "Selective Permeability, Cell Signaling, and Cellular Trafficking",
+            select: "",
+            state: false
+        }, {
+            problem: "What membrane component acts as receptors, receiving and responding to extracellular signals?",
+            choices: "Proteins/Lipids/Carbohydrates/Nucleic acids/None of the above",
+            answer: "Proteins",
+            select: "",
+            state: false
+        }, {
+            problem: "What two types of biomolecules on the cell surface are crucial for immune recognition?",
+            choices: "Proteins and Carbohydrates/Lipids and Nucleic Acids/Enzymes and Hormones/None of the above",
+            answer: "Proteins and Carbohydrates",
+            select: "",
+            state: false
+        }, {
+            problem: "Which two types of lipids are found abundantly in the plasma membrane?",
+            choices: "Cholesterol and Sphingolipid/Phospholipids and Triglycerides/Waxes and Terpenes/None of the above",
+            answer: "Cholesterol and Sphingolipid",
+            select: "",
+            state: false
+        }, {
+            problem: "What phospholipid is enriched in the inner mitochondrial membrane?",
+            choices: "Cardiolipin/Phosphatidylcholine/Phosphatidylethanolamine/Phosphatidylserine/None of the above",
+            answer: "Cardiolipin",
+            select: "",
+            state: false
+        }, {
+            problem: "Which leaflet of the plasma membrane, facing the cytoplasm, is enriched in phosphatidylserine (PS) and inositol phospholipids?",
+            choices: "Inner leaflet/Outer leaflet",
+            answer: "Inner leaflet",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the two types of movements that phospholipids can undergo within the membrane?",
+            choices: "Lateral and Transverse (flip-flop)/Rotational and Vibrational/Flexion and Extension/None of the above",
+            answer: "Lateral and Transverse (flip-flop)",
+            select: "",
+            state: false
+        }, {
+            problem: "Which type of movement requires energy (ATP)?",
+            choices: "Transverse movement (flip-flop)/Lateral movement",
+            answer: "Transverse movement (flip-flop)",
+            select: "",
+            state: false
+        }, {
+            problem: "What happens to phosphatidylserine (PS) during apoptosis, serving as an 'eat-me' signal for phagocytosis?",
+            choices: "It is flipped to the outer leaflet of the plasma membrane/It remains in the inner leaflet of the plasma membrane/It is degraded/It is internalized via endocytosis/None of the above",
+            answer: "It is flipped to the outer leaflet of the plasma membrane",
+            select: "",
+            state: false
+        }, {
+            problem: "How does an increase in unsaturated fatty acids (UFAs) in the membrane affect fluidity?",
+            choices: "Increases fluidity/Decreases fluidity/No effect",
+            answer: "Increases fluidity",
+            select: "",
+            state: false
+        }, {
+            problem: "What effect does cholesterol have on membrane fluidity in the presence of saturated fatty acids?",
+            choices: "Increases fluidity/Decreases fluidity/No effect",
+            answer: "Increases fluidity",
+            select: "",
+            state: false
+        }, {
+            problem: "At low temperatures, what effect does cholesterol have on membrane fluidity?",
+            choices: "Maintains fluidity, preventing the membrane from becoming too rigid/Decreases fluidity, making the membrane more rigid/No effect",
+            answer: "Maintains fluidity, preventing the membrane from becoming too rigid",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of proteins that contribute to the structural integrity of the erythrocyte (red blood cell) membrane.",
+            choices: "Spectrin and Ankyrin/Collagen and Elastin/Actin and Myosin/Tubulin and Microtubules/None of the above",
+            answer: "Spectrin and Ankyrin",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three types of membrane proteins based on their location and interaction with the lipid bilayer.",
+            choices: "Integral proteins, Peripheral proteins, and Lipid-anchored proteins/Structural proteins, Functional proteins, and Signaling proteins/Enzymes, Transporters, and Receptors/None of the above",
+            answer: "Integral proteins, Peripheral proteins, and Lipid-anchored proteins",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three major functions of proteins in biological membranes.",
+            choices: "Transport, Enzyme activity, and Signal transduction/Energy storage, Structural support, and Genetic information storage/None of the above",
+            answer: "Transport, Enzyme activity, and Signal transduction",
+            select: "",
+            state: false
+        }, {
+            problem: "What are three main functions of carbohydrates in biological membranes?",
+            choices: "Recognition, Protection, and Increasing surface area/Energy storage, Enzymatic catalysis, and Transport/None of the above",
+            answer: "Recognition, Protection, and Increasing surface area",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of transport does not require energy and involves the movement of molecules down their concentration gradient?",
+            choices: "Passive transport (simple diffusion and facilitated diffusion)/Active transport",
+            answer: "Passive transport (simple diffusion and facilitated diffusion)",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of transport requires energy (ATP) and involves the movement of molecules against their concentration gradient?",
+            choices: "Active transport/Passive transport (simple diffusion and facilitated diffusion)",
+            answer: "Active transport",
+            select: "",
+            state: false
+        }, {
+            problem: "What glucose transporter is abundant in erythrocytes (red blood cells), fetal tissues, and the blood-brain barrier, responsible for basal glucose uptake?",
+            choices: "GLUT1/GLUT2/GLUT3/GLUT4/GLUT5",
+            answer: "GLUT1",
+            select: "",
+            state: false
+        }, {
+            problem: "Which glucose transporter is important for glucose uptake in the liver, pancreas, and intestine, and is involved in glucose-stimulated insulin release?",
+            choices: "GLUT2/GLUT1/GLUT3/GLUT4/GLUT5",
+            answer: "GLUT2",
+            select: "",
+            state: false
+        }, {
+            problem: "What glucose transporter is found in the brain and is responsible for basal glucose uptake?",
+            choices: "GLUT3/GLUT1/GLUT2/GLUT4/GLUT5",
+            answer: "GLUT3",
+            select: "",
+            state: false
+        }, {
+            problem: "What glucose transporter, primarily found in muscle and fat cells, is regulated by insulin, playing a key role in glucose uptake and glycogen synthesis?",
+            choices: "GLUT4/GLUT1/GLUT2/GLUT3/GLUT5",
+            answer: "GLUT4",
+            select: "",
+            state: false
+        }, {
+            problem: "What glucose transporter is primarily found in the small intestine and is responsible for fructose transport?",
+            choices: "GLUT5/GLUT1/GLUT2/GLUT3/GLUT4",
+            answer: "GLUT5",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of cellular processes that involve exocytosis, the release of molecules from the cell.",
+            choices: "Release of insulin from pancreatic beta cells and Release of neurotransmitters from neurons/Uptake of glucose by muscle cells and Phagocytosis of bacteria by macrophages/Breakdown of cellular waste products in lysosomes and Production of ATP in mitochondria/None of the above",
+            answer: "Release of insulin from pancreatic beta cells and Release of neurotransmitters from neurons",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of cellular processes that involve endocytosis, the uptake of molecules into the cell.",
+            choices: "Phagocytosis of bacteria by macrophages and Uptake of nutrients by intestinal cells/Release of hormones from endocrine glands and Secretion of enzymes from digestive cells/Cell division and Muscle contraction/None of the above",
+            answer: "Phagocytosis of bacteria by macrophages and Uptake of nutrients by intestinal cells",
+            select: "",
+            state: false
+        }, {
+            problem: "What are lipid rafts, and what are their two primary functions?",
+            choices: "Specialized microdomains enriched in cholesterol and sphingolipids, involved in cell signaling and endocytosis/Randomly distributed lipids within the membrane/Non-functional regions of the membrane/None of the above",
+            answer: "Specialized microdomains enriched in cholesterol and sphingolipids, involved in cell signaling and endocytosis",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the inherited disorder caused by mutations in the spectrin gene, resulting in abnormally shaped red blood cells and leading to hemolysis?",
+            choices: "Hereditary spherocytosis/Sickle cell anemia/Thalassemia/Hemophilia/None of the above",
+            answer: "Hereditary spherocytosis",
+            select: "",
+            state: false
+        }, {
+            problem: "What toxin produced by Vibrio cholera causes watery diarrhea by interfering with GPCR signaling in intestinal cells?",
+            choices: "Cholera toxin/Tetanus toxin/Botulinum toxin/Diphtheria toxin/None of the above",
+            answer: "Cholera toxin",
+            select: "",
+            state: false
+        }, {
+            problem: "What bacterial species, commonly found in soil and contaminated wounds, causes gas gangrene, a serious infection characterized by tissue death and gas production?",
+            choices: "Clostridium perfringens/Vibrio cholera/Staphylococcus aureus/Escherichia coli/None of the above",
+            answer: "Clostridium perfringens",
+            select: "",
+            state: false
+        }, {
+            problem: "Why does gas gangrene typically occur in tissues with low oxygen levels (anaerobic environments)?",
+            choices: "Clostridium perfringens thrives in anaerobic conditions and produces toxins that damage tissues/The bacteria cannot survive in the presence of oxygen/Oxygen inhibits the production of toxins by the bacteria/None of the above",
+            answer: "Clostridium perfringens thrives in anaerobic conditions and produces toxins that damage tissues",
+            select: "",
+            state: false
+        }, {
+            problem: "What enzyme, released by Clostridium perfringens, degrades lipids in tissues, contributing to the spread of infection and gas production?",
+            choices: "Lipase/Protease/Collagenase/Hyaluronidase/None of the above",
+            answer: "Lipase",
+            select: "",
+            state: false
+        }, {
+            problem: "What autoimmune disease is characterized by the destruction of the myelin sheath surrounding nerve fibers, leading to impaired nerve impulse transmission?",
+            choices: "Multiple sclerosis/Rheumatoid arthritis/Systemic lupus erythematosus/Type 1 diabetes/None of the above",
+            answer: "Multiple sclerosis",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of structures used in drug delivery that can be formed from lipids?",
+            choices: "Micelles and liposomes/Viruses and nanoparticles/Antibodies and proteins/None of the above",
+            answer: "Micelles and liposomes",
+            select: "",
+            state: false
+        }];
+        var questions7 = [{
+            problem: "By what factor do enzymes typically increase the rate of a reaction?",
+            choices: "10⁵ to 10¹⁷/10¹ to 10²/1 to 10/10³ to 10⁶/10⁸ to 10¹¹",
+            answer: "10⁵ to 10¹⁷",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the three main functions of an enzyme's active site?",
+            choices: "Substrate binding, reaction catalysis, and cofactor binding/Substrate degradation, product synthesis, and energy production/DNA replication, RNA transcription, and protein translation/Cell signaling, transport, and structural support/None of the above",
+            answer: "Substrate binding, reaction catalysis, and cofactor binding",
+            select: "",
+            state: false
+        }, {
+            problem: "What two components are required to form a holoenzyme?",
+            choices: "Apoenzyme and Cofactor/Enzyme and Substrate/Protein and Carbohydrate/DNA and RNA/None of the above",
+            answer: "Apoenzyme and Cofactor",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of cofactor is an inorganic molecule that assists in enzyme activity?",
+            choices: "Metal ion/Coenzyme/Prosthetic group/None of the above",
+            answer: "Metal ion",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of coenzymes that act as cosubstrates, binding loosely to enzymes.",
+            choices: "NAD+ and FAD/Vitamin B12 and heme/Cu and Zn/None of the above",
+            answer: "NAD+ and FAD",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of coenzymes that are tightly bound to enzymes as prosthetic groups.",
+            choices: "Vitamin B12 and heme/NAD+ and FAD/Mg and Zn/None of the above",
+            answer: "Vitamin B12 and heme",
+            select: "",
+            state: false
+        }, {
+            problem: "What are isozymes?",
+            choices: "Enzymes with different structures but catalyze the same reaction and are located in different parts of the cell/Enzymes with the same structure but catalyze different reactions/Inactive precursors of enzymes/Enzymes that require a cofactor for activity/None of the above",
+            answer: "Enzymes with different structures but catalyze the same reaction and are located in different parts of the cell",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the reaction catalyzed by the enzyme isocitrate dehydrogenase (IDH)?",
+            choices: "α-ketoglutarate (α-KG) ↔ citrate and NADPH production/Glucose ↔ Glucose-6-phosphate/Pyruvate ↔ Lactate/None of the above",
+            answer: "α-ketoglutarate (α-KG) ↔ citrate and NADPH production",
+            select: "",
+            state: false
+        }, {
+            problem: "Where are IDH1 and IDH2 located, respectively?",
+            choices: "IDH1 is in the cytosol, and IDH2 is in the mitochondria/IDH1 is in the nucleus, and IDH2 is in the endoplasmic reticulum/IDH1 and IDH2 are both in the mitochondria/None of the above",
+            answer: "IDH1 is in the cytosol, and IDH2 is in the mitochondria",
+            select: "",
+            state: false
+        }, {
+            problem: "What enzyme is responsible for transferring phosphate between creatine and ATP?",
+            choices: "Creatine kinase (CK) or Creatine phosphokinase (CPK)/Lactate dehydrogenase (LDH)/Isocitrate dehydrogenase (IDH)/None of the above",
+            answer: "Creatine kinase (CK) or Creatine phosphokinase (CPK)",
+            select: "",
+            state: false
+        }, {
+            problem: "Elevation of what enzyme in the blood is indicative of muscle damage and can be used for diagnosis based on isozyme type?",
+            choices: "CK/LDH/AST/ALT/None of the above",
+            answer: "CK",
+            select: "",
+            state: false
+        }, {
+            problem: "What isoform of CK is primarily found in the brain?",
+            choices: "CK-BB/CK-MM/CK-MB/None of the above",
+            answer: "CK-BB",
+            select: "",
+            state: false
+        }, {
+            problem: "Which isoform of CK is predominantly found in the heart and elevated levels are associated with a heart attack?",
+            choices: "CK-MB/CK-BB/CK-MM/None of the above",
+            answer: "CK-MB",
+            select: "",
+            state: false
+        }, {
+            problem: "Elevated levels of which isoform of CK is associated with muscular dystrophy?",
+            choices: "CK-MM/CK-MB/CK-BB/None of the above",
+            answer: "CK-MM",
+            select: "",
+            state: false
+        }, {
+            problem: "What reaction does the enzyme lactate dehydrogenase (LDH) catalyze?",
+            choices: "Lactate ↔ Pyruvate/Glucose ↔ Glucose-6-phosphate/α-KG ↔ citrate/None of the above",
+            answer: "Lactate ↔ Pyruvate",
+            select: "",
+            state: false
+        }, {
+            problem: "Which isoform of LDH primarily catalyzes lactate oxidation to pyruvate, commonly found in the heart and red blood cells?",
+            choices: "LDH1/LDH5/LDH2/LDH3/LDH4",
+            answer: "LDH1",
+            select: "",
+            state: false
+        }, {
+            problem: "Which isoform of LDH primarily catalyzes pyruvate reduction to lactate and is found in skeletal muscle and the liver?",
+            choices: "LDH5/LDH1/LDH2/LDH3/LDH4",
+            answer: "LDH5",
+            select: "",
+            state: false
+        }, {
+            problem: "What are proenzymes or zymogens?",
+            choices: "Inactive precursors of enzymes that require proteolytic cleavage for activation/Active enzymes/Enzymes that require a cofactor/None of the above",
+            answer: "Inactive precursors of enzymes that require proteolytic cleavage for activation",
+            select: "",
+            state: false
+        }, {
+            problem: "What enzyme is involved in the conversion of chymotrypsinogen to chymotrypsin?",
+            choices: "Proteolytic enzymes/Transferases/Isomerases/Ligases/None of the above",
+            answer: "Proteolytic enzymes",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the six main classes of enzymes based on the reactions they catalyze?",
+            choices: "Oxidoreductases, Transferases, Hydrolases, Lyases, Isomerases, Ligases/Hydrolases, Isomerases, Ligases, Lyases, Oxidoreductases, Transferases/Lyases, Isomerases, Ligases, Transferases, Hydrolases, Oxidoreductases/Isomerases, Ligases, Lyases, Oxidoreductases, Transferases, Hydrolases/None of the above",
+            answer: "Oxidoreductases, Transferases, Hydrolases, Lyases, Isomerases, Ligases",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of reaction is catalyzed by oxidoreductases?",
+            choices: "Oxidation-reduction (Redox)/Transfer of a functional group/Hydrolysis/Bond cleavage by other means/Isomerization/Ligation",
+            answer: "Oxidation-reduction (Redox)",
+            select: "",
+            state: false
+        }, {
+            problem: "What subclass of oxidoreductases is responsible for moving hydrogen atoms?",
+            choices: "Dehydrogenases/Hydroxylases/Oxidases/None of the above",
+            answer: "Dehydrogenases",
+            select: "",
+            state: false
+        }, {
+            problem: "Give an example of a dehydrogenase enzyme.",
+            choices: "LDH (Lactate Dehydrogenase)/CK (Creatine Kinase)/AST (Aspartate Transaminase)/None of the above",
+            answer: "LDH (Lactate Dehydrogenase)",
+            select: "",
+            state: false
+        }, {
+            problem: "What subclasses of oxidoreductases typically require a metal ion and molecular oxygen (O2)?",
+            choices: "Hydroxylases and oxidases/Dehydrogenases/None of the above",
+            answer: "Hydroxylases and oxidases",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of reaction is catalyzed by transferases?",
+            choices: "Transfer of a functional group/Oxidation-reduction (Redox)/Hydrolysis/Bond cleavage by other means/Isomerization/Ligation",
+            answer: "Transfer of a functional group",
+            select: "",
+            state: false
+        }, {
+            problem: "What is a characteristic requirement of most transferases for their function?",
+            choices: "They need a cofactor/They are allosterically regulated/They are membrane-bound/They function only at specific pH/None of the above",
+            answer: "They need a cofactor",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of transferase is responsible for moving phosphate groups, often from ATP?",
+            choices: "Kinase/Transaminase/Phosphorylase/None of the above",
+            answer: "Kinase",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of reaction is catalyzed by hydrolases?",
+            choices: "Hydrolysis (breaking bonds by the addition of water)/Oxidation-reduction (Redox)/Transfer of a functional group/Bond cleavage by other means/Isomerization/Ligation",
+            answer: "Hydrolysis (breaking bonds by the addition of water)",
+            select: "",
+            state: false
+        }, {
+            problem: "What important physiological process involves a variety of hydrolases?",
+            choices: "Digestion/Cellular Respiration/Photosynthesis/DNA replication/None of the above",
+            answer: "Digestion",
+            select: "",
+            state: false
+        }, {
+            problem: "Do lyases and synthases require ATP for their function?",
+            choices: "No, they typically do not require ATP/Yes, they always require ATP/It depends on the specific lyase or synthase",
+            answer: "No, they typically do not require ATP",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of reaction do isomerases catalyze?",
+            choices: "Rearrangement of atoms within a molecule to form isomers/Oxidation-reduction (Redox)/Transfer of a functional group/Hydrolysis/Bond cleavage by other means/Ligation",
+            answer: "Rearrangement of atoms within a molecule to form isomers",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of isomerase is involved in the interconversion of alpha and beta anomers of sugars?",
+            choices: "Epimerase/Racemase/Isomerase/None of the above",
+            answer: "Epimerase",
+            select: "",
+            state: false
+        }, {
+            problem: "Do ligases and synthases require ATP for their function?",
+            choices: "Yes, they typically require ATP for condensation reactions/No, they do not require ATP/It depends on the specific ligase or synthase",
+            answer: "Yes, they typically require ATP for condensation reactions",
+            select: "",
+            state: false
+        }, {
+            problem: "Give an example of a ligase involved in joining DNA fragments.",
+            choices: "DNA ligase/RNA polymerase/DNA helicase/None of the above",
+            answer: "DNA ligase",
+            select: "",
+            state: false
+        }, {
+            problem: "What mineral is a component of the enzyme catalase, which is responsible for breaking down hydrogen peroxide?",
+            choices: "Iron (Fe)/Magnesium (Mg)/Zinc (Zn)/Copper (Cu)/Selenium (Se)",
+            answer: "Iron (Fe)",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two enzymes that require magnesium for their function.",
+            choices: "ATPase and Kinase/Alcohol dehydrogenase and Carbonic Anhydrase/Melanin and Superoxide Dismutase (SOD)/Glutathione Peroxidase (GPx)/None of the above",
+            answer: "ATPase and Kinase",
+            select: "",
+            state: false
+        }, {
+            problem: "What two enzymes require zinc for their activity?",
+            choices: "Alcohol dehydrogenase and Carbonic anhydrase/ATPase and Kinase/Melanin and Superoxide Dismutase (SOD)/Glutathione Peroxidase (GPx)/None of the above",
+            answer: "Alcohol dehydrogenase and Carbonic anhydrase",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two enzymes that require copper for their activity?",
+            choices: "Melanin and Superoxide Dismutase (SOD)/ATPase and Kinase/Alcohol dehydrogenase and Carbonic anhydrase/Glutathione Peroxidase (GPx)/None of the above",
+            answer: "Melanin and Superoxide Dismutase (SOD)",
+            select: "",
+            state: false
+        }, {
+            problem: "What enzyme requires selenium for its activity and is involved in detoxification?",
+            choices: "Glutathione peroxidase (GPx)/Alcohol dehydrogenase/Carbonic anhydrase/Melanin/None of the above",
+            answer: "Glutathione peroxidase (GPx)",
+            select: "",
+            state: false
+        }, {
+            problem: "What coenzyme is derived from vitamin B1 (thiamine) and plays a crucial role in carbohydrate metabolism?",
+            choices: "TPP (thiamine pyrophosphate)/CoA/PLP/FAD/NAD+",
+            answer: "TPP (thiamine pyrophosphate)",
+            select: "",
+            state: false
+        }, {
+            problem: "What coenzyme is derived from vitamin B5 (pantothenic acid) and plays a role in fatty acid and red blood cell synthesis?",
+            choices: "CoA (Coenzyme A)/TPP/PLP/FAD/NAD+",
+            answer: "CoA (Coenzyme A)",
+            select: "",
+            state: false
+        }, {
+            problem: "What coenzyme is derived from vitamin B6 (pyridoxine) and is involved in amino acid metabolism and heme synthesis?",
+            choices: "PLP (Pyridoxal phosphate)/TPP/CoA/FAD/NAD+",
+            answer: "PLP (Pyridoxal phosphate)",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two functions of coenzymes derived from vitamin B2 (riboflavin).",
+            choices: "Electron carriers in energy production (redox) and antioxidants/Amino acid transfer and heme synthesis/DNA repair and fatty acid synthesis/None of the above",
+            answer: "Electron carriers in energy production (redox) and antioxidants",
+            select: "",
+            state: false
+        }, {
+            problem: "What are two functions of coenzymes derived from vitamin B3 (niacin)?",
+            choices: "Electron carriers in energy production (redox) and DNA repair/Amino acid transfer and heme synthesis/Fatty acid synthesis and carboxylation/None of the above",
+            answer: "Electron carriers in energy production (redox) and DNA repair",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the function of biotin (Vitamin B7) as a coenzyme?",
+            choices: "Involved in carboxylation reactions in fatty acid synthesis and anaplerosis/Involved in DNA synthesis/Acts as an antioxidant/None of the above",
+            answer: "Involved in carboxylation reactions in fatty acid synthesis and anaplerosis",
+            select: "",
+            state: false
+        }, {
+            problem: "What coenzyme is derived from vitamin B9 (folic acid) and involved in DNA synthesis?",
+            choices: "THF (tetrahydrofolate)/Biotin/TPP/None of the above",
+            answer: "THF (tetrahydrofolate)",
+            select: "",
+            state: false
+        }, {
+            problem: "Coenzymes derived from Vitamin B12 are involved in what type of reaction?",
+            choices: "Isomerization reactions in amino acid metabolism/Redox reactions/Carboxylation reactions/None of the above",
+            answer: "Isomerization reactions in amino acid metabolism",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two functions of vitamin C (ascorbic acid) in the body.",
+            choices: "Collagen synthesis and antioxidant/Blood clotting/Fatty acid synthesis/None of the above",
+            answer: "Collagen synthesis and antioxidant",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the primary function of Vitamin K?",
+            choices: "Blood clotting/Collagen synthesis/Energy production/DNA synthesis/None of the above",
+            answer: "Blood clotting",
+            select: "",
+            state: false
+        }, {
+            problem: "Give five vitamins that are required for the proper function of the Pyruvate Dehydrogenase Complex.",
+            choices: "B1, B2, B3, B5, and Lipoic Acid/A, C, D, E, and K/None of the above",
+            answer: "B1, B2, B3, B5, and Lipoic Acid",
+            select: "",
+            state: false
+        }, {
+            problem: "What molecule blocks the action of vitamin K-dependent enzymes?",
+            choices: "Warfarin/Ethanol/Aspirin/Organophosphate/None of the above",
+            answer: "Warfarin",
+            select: "",
+            state: false
+        }, {
+            problem: "Chronic alcohol consumption can reduce the absorption of which vitamins leading to Korsakoff Syndrome?",
+            choices: "B1 and B6/A and D/C and E/None of the above",
+            answer: "B1 and B6",
+            select: "",
+            state: false
+        }, {
+            problem: "What are the three basic steps in an enzyme-catalyzed reaction?",
+            choices: "Binding of substrate, catalysis of reaction, and release of product/Initiation, elongation, and termination/Activation, reaction, and inactivation/None of the above",
+            answer: "Binding of substrate, catalysis of reaction, and release of product",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three factors that affect enzyme reaction rate.",
+            choices: "Enzyme concentration, substrate concentration, and temperature/Pressure, pH, and humidity/Light, sound, and gravity/None of the above",
+            answer: "Enzyme concentration, substrate concentration, and temperature",
+            select: "",
+            state: false
+        }, {
+            problem: "Does a high Km indicate a strong or weak affinity of the enzyme for its substrate?",
+            choices: "Weak affinity/Strong affinity/Km does not reflect enzyme-substrate affinity",
+            answer: "Weak affinity",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two broad categories of enzyme inhibitors.",
+            choices: "Reversible and Irreversible/Competitive and Non-competitive/Allosteric and Covalent/None of the above",
+            answer: "Reversible and Irreversible",
+            select: "",
+            state: false
+        }, {
+            problem: "Where on an enzyme do competitive inhibitors bind?",
+            choices: "Active Site/Allosteric site/They don't bind to the enzyme",
+            answer: "Active Site",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the effect of a competitive inhibitor on Km?",
+            choices: "Increases Km/Decreases Km/Has no effect on Km",
+            answer: "Increases Km",
+            select: "",
+            state: false
+        }, {
+            problem: "What substance can be used to treat methanol poisoning by competing for the active site of alcohol dehydrogenase?",
+            choices: "Ethanol/Aspirin/Warfarin/None of the above",
+            answer: "Ethanol",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the primary mechanism of action of non-competitive inhibitors?",
+            choices: "Binding to a site other than the active site, changing the enzyme's conformation and decreasing Vmax/Competing with the substrate for binding to the active site/Forming a covalent bond with the enzyme/None of the above",
+            answer: "Binding to a site other than the active site, changing the enzyme's conformation and decreasing Vmax",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of bond is formed between an irreversible inhibitor and an enzyme?",
+            choices: "Covalent Bond/Hydrogen bond/Ionic bond/None of the above",
+            answer: "Covalent Bond",
+            select: "",
+            state: false
+        }, {
+            problem: "What enzyme does aspirin inhibit?",
+            choices: "COX (cyclooxygenase)/Organophosphate/PFK-1/None of the above",
+            answer: "COX (cyclooxygenase)",
+            select: "",
+            state: false
+        }, {
+            problem: "What molecule accumulates when organophosphate inhibits cholinesterase leading to slowed parasympathetic responses?",
+            choices: "Acetylcholine (ACh)/Aspirin/Warfarin/None of the above",
+            answer: "Acetylcholine (ACh)",
+            select: "",
+            state: false
+        }, {
+            problem: "Where on an enzyme do allosteric regulators bind?",
+            choices: "Allosteric site (a site distinct from the active site)/Active Site/They don't bind to the enzyme",
+            answer: "Allosteric site (a site distinct from the active site)",
+            select: "",
+            state: false
+        }, {
+            problem: "What effect does binding of the first oxygen molecule to Hemoglobin have on the binding of subsequent oxygen molecules?",
+            choices: "It enhances the binding of additional oxygen molecules/It inhibits the binding of additional oxygen molecules/It has no effect on the binding of additional oxygen molecules/None of the above",
+            answer: "It enhances the binding of additional oxygen molecules",
+            select: "",
+            state: false
+        }, {
+            problem: "What are two examples of allosteric regulators of the enzyme PFK-1, a key enzyme in glycolysis?",
+            choices: "AMP and ATP/Glucose and fructose/NAD+ and NADH/None of the above",
+            answer: "AMP and ATP",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of molecule is a ribozyme?",
+            choices: "RNA with catalytic activity (RNA enzyme)/DNA with catalytic activity/Protein enzyme/None of the above",
+            answer: "RNA with catalytic activity (RNA enzyme)",
+            select: "",
+            state: false
+        }];
+        var questions8 = [{
+            problem: "What does bioenergetics study?",
+            choices: "Energy transformations in living organisms/The structure and function of biomolecules/The mechanisms of enzyme catalysis/The genetic code and protein synthesis/The regulation of metabolic pathways",
+            answer: "Energy transformations in living organisms",
+            select: "",
+            state: false
+        }, {
+            problem: "What form of energy is released during many biological processes?",
+            choices: "Heat/Light/Sound/Electricity/None of the above",
+            answer: "Heat",
+            select: "",
+            state: false
+        }, {
+            problem: "What does a negative Gibbs Free Energy (ΔG) value indicate about a reaction?",
+            choices: "The reaction releases energy (exergonic)/The reaction requires energy (endergonic)/The reaction is at equilibrium/The reaction cannot occur spontaneously/None of the above",
+            answer: "The reaction releases energy (exergonic)",
+            select: "",
+            state: false
+        }, {
+            problem: "In a human metabolic reaction with a negative ΔG, how can more energy be generated from the reaction?",
+            choices: "Increase the concentration of the reactants/Increase the concentration of the products/Decrease the temperature/Increase the pressure/None of the above",
+            answer: "Increase the concentration of the reactants",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three products of catabolic reactions, which break down molecules and release energy.",
+            choices: "ATP, NADH, NADPH/Glucose, glycogen, and starch/Proteins, lipids, and nucleic acids/CO2, H2O, and NH3/None of the above",
+            answer: "ATP, NADH, NADPH",
+            select: "",
+            state: false
+        }, {
+            problem: "What molecule is generated through the hydrolysis of PEP and considered the main energy currency of the cell?",
+            choices: "ATP/ADP/AMP/GTP/None of the above",
+            answer: "ATP",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three amino acids that can be phosphorylated due to their hydroxyl (OH) group.",
+            choices: "Serine, Threonine, and Tyrosine/Alanine, Glycine, and Valine/Phenylalanine, Tryptophan, and Histidine/Aspartic acid, Glutamic acid, and Lysine/None of the above",
+            answer: "Serine, Threonine, and Tyrosine",
+            select: "",
+            state: false
+        }, {
+            problem: "Which five-carbon sugar is often involved in pyrophosphoryl transfer reactions with ATP?",
+            choices: "Ribose-5-phosphate (R5P)/Glucose-6-phosphate/Fructose-6-phosphate/Deoxyribose-5-phosphate/None of the above",
+            answer: "Ribose-5-phosphate (R5P)",
+            select: "",
+            state: false
+        }, {
+            problem: "Besides phosphorylation, what are two other ways ATP can be used to transfer energy to biomolecules?",
+            choices: "Pyrophosphoryl transfer and Adenylyl transfer/Methylation and Acetylation/Oxidation and Reduction/Hydrolysis and Dehydration/None of the above",
+            answer: "Pyrophosphoryl transfer and Adenylyl transfer",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of reaction is required for oxidative phosphorylation (OXPHOS)?",
+            choices: "Electron transport chain in the presence of Oxygen/Hydrolysis of glucose/Beta-oxidation of fatty acids/None of the above",
+            answer: "Electron transport chain in the presence of Oxygen",
+            select: "",
+            state: false
+        }, {
+            problem: "What are two examples of phosphagens, molecules that store high-energy phosphate?",
+            choices: "Creatine phosphate and Arginine phosphate/ATP and ADP/Glucose-6-phosphate and Fructose-6-phosphate/NADH and FADH2/None of the above",
+            answer: "Creatine phosphate and Arginine phosphate",
+            select: "",
+            state: false
+        }, {
+            problem: "Where is creatine primarily synthesized and stored?",
+            choices: "Liver and muscles, respectively/Kidneys/Brain/Heart/None of the above",
+            answer: "Liver and muscles, respectively",
+            select: "",
+            state: false
+        }, {
+            problem: "What molecule, derived from creatine, is excreted in urine and serves as an indicator of renal function?",
+            choices: "Creatinine/Creatine/Uric acid/Urea/None of the above",
+            answer: "Creatinine",
+            select: "",
+            state: false
+        }, {
+            problem: "What enzyme catalyzes the reversible transfer of phosphate between creatine phosphate and ADP, playing a crucial role in ATP homeostasis in muscle cells?",
+            choices: "Creatine kinase (CK)/Adenylate kinase/ATP synthase/None of the above",
+            answer: "Creatine kinase (CK)",
+            select: "",
+            state: false
+        }, {
+            problem: "If a patient has elevated levels of creatinine in the blood, what organ dysfunction might be suspected?",
+            choices: "Kidney dysfunction/Liver dysfunction/Heart dysfunction/Muscle damage/None of the above",
+            answer: "Kidney dysfunction",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the main signal that activates AMPK, triggering energy production?",
+            choices: "Low ATP levels (specifically, high AMP levels)/High ATP levels/High glucose levels/Low glucose levels/None of the above",
+            answer: "Low ATP levels (specifically, high AMP levels)",
+            select: "",
+            state: false
+        }, {
+            problem: "What cellular process, stimulated by AMPK, involves the breakdown and recycling of cellular components to generate energy?",
+            choices: "Autophagy/Apoptosis/Cell division/DNA replication/None of the above",
+            answer: "Autophagy",
+            select: "",
+            state: false
+        }, {
+            problem: "What signaling pathway, promoting cell growth and proliferation, is inhibited by AMPK during low energy conditions?",
+            choices: "mTORC1/PI3K/Akt/MAPK/None of the above",
+            answer: "mTORC1",
+            select: "",
+            state: false
+        }, {
+            problem: "Give three signals produced by the hypothalamus when energy levels are low.",
+            choices: "Low glucose, adiponectin, and ghrelin/High glucose, leptin, and insulin/Ghrelin, GIP, and glucagon/None of the above",
+            answer: "Low glucose, adiponectin, and ghrelin",
+            select: "",
+            state: false
+        }, {
+            problem: "What pancreatic hormone is secreted in response to high blood glucose, promoting energy storage and utilization?",
+            choices: "Insulin/Glucagon/Somatostatin/None of the above",
+            answer: "Insulin",
+            select: "",
+            state: false
+        }, {
+            problem: "Give an example of a hormone secreted by the hypothalamus in response to low energy levels, increasing food intake and stimulating the release of other hormones.",
+            choices: "Ghrelin/Leptin/Insulin/Glucagon/None of the above",
+            answer: "Ghrelin",
+            select: "",
+            state: false
+        }, {
+            problem: "What term describes the process by which cells receive and respond to extracellular signals?",
+            choices: "Signal transduction/Gene expression/Cellular respiration/Metabolism/None of the above",
+            answer: "Signal transduction",
+            select: "",
+            state: false
+        }, {
+            problem: "What key characteristic of signal transduction ensures that a specific signal molecule triggers a specific cellular response?",
+            choices: "Specificity/Amplification/Modularity/Adaptation/None of the above",
+            answer: "Specificity",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of protein acts as a scaffold to organize and enhance the efficiency of signal transduction pathways?",
+            choices: "Scaffold protein/Receptor protein/Kinase/Phosphatase/None of the above",
+            answer: "Scaffold protein",
+            select: "",
+            state: false
+        }, {
+            problem: "What physiological phenomenon involving sensory adaptation, such as smell or vision, reflects the modulation of signal transduction to adjust sensitivity?",
+            choices: "Adaptation/Specificity/Modularity/Localization/None of the above",
+            answer: "Adaptation",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the term for chemical signals that act on the same cell that produces them?",
+            choices: "Autocrine signals/Paracrine signals/Endocrine signals/None of the above",
+            answer: "Autocrine signals",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the term for chemical signals that act on nearby cells?",
+            choices: "Paracrine signals/Autocrine signals/Endocrine signals/None of the above",
+            answer: "Paracrine signals",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of chemical signals, like hormones, are released into the bloodstream to act on distant target cells?",
+            choices: "Endocrine signals/Autocrine signals/Paracrine signals/None of the above",
+            answer: "Endocrine signals",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of molecules that bind to nuclear receptors and regulate gene expression.",
+            choices: "Calcitriol and retinoic acid/Insulin and glucagon/Epinephrine and norepinephrine/None of the above",
+            answer: "Calcitriol and retinoic acid",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two physiological effects of steroid hormones, regulated by nuclear receptors.",
+            choices: "Increased Basal Metabolic Rate (BMR) and Thermogenesis/Blood glucose regulation/Immune response/None of the above",
+            answer: "Increased Basal Metabolic Rate (BMR) and Thermogenesis",
+            select: "",
+            state: false
+        }, {
+            problem: "What are three major types of cell membrane receptors?",
+            choices: "GPCR, Tyrosine kinase receptor, and Cytokine receptor/Nuclear receptors, Intracellular receptors, and Channel-linked receptors/None of the above",
+            answer: "GPCR, Tyrosine kinase receptor, and Cytokine receptor",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the role of GTP in G protein-coupled receptor (GPCR) signaling?",
+            choices: "It acts as a molecular switch, activating the G protein/It serves as a second messenger, relaying the signal downstream/It inhibits GPCR activity/None of the above",
+            answer: "It acts as a molecular switch, activating the G protein",
+            select: "",
+            state: false
+        }, {
+            problem: "What type of enzyme is activated by the Gs α subunit of a G protein?",
+            choices: "Adenylyl cyclase/Phospholipase C/Protein kinase A/Protein kinase C/None of the above",
+            answer: "Adenylyl cyclase",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the role of cAMP (cyclic AMP) in GPCR signaling?",
+            choices: "It acts as a second messenger, activating protein kinase A (PKA)/It binds to GPCRs, initiating the signal transduction pathway/It inhibits the activity of adenylate cyclase/None of the above",
+            answer: "It acts as a second messenger, activating protein kinase A (PKA)",
+            select: "",
+            state: false
+        }, {
+            problem: "Give two examples of GPCR inhibitors commonly found in beverages and medications.",
+            choices: "Sildenafil (Viagra) and caffeine/Aspirin and ibuprofen/Statins and fibrates/None of the above",
+            answer: "Sildenafil (Viagra) and caffeine",
+            select: "",
+            state: false
+        }, {
+            problem: "What enzyme is activated by the Gq α subunit of a G protein?",
+            choices: "Phospholipase C/Adenylyl cyclase/Protein kinase A/Protein kinase C/None of the above",
+            answer: "Phospholipase C",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the function of IP3, a second messenger generated by the activation of phospholipase C?",
+            choices: "It triggers the release of calcium ions from intracellular stores/It activates protein kinase C (PKC)/It inhibits the activity of phospholipase C/None of the above",
+            answer: "It triggers the release of calcium ions from intracellular stores",
+            select: "",
+            state: false
+        }, {
+            problem: "What are two signaling pathways activated by the insulin receptor, a tyrosine kinase receptor?",
+            choices: "PI3K or Akt and MAPK/cAMP or PKA and PLC/IP3 or JAK/STAT and TGF-beta/None of the above",
+            answer: "PI3K or Akt and MAPK",
+            select: "",
+            state: false
+        }, {
+            problem: "What hormone, produced by adipocytes, activates the JAK/STAT pathway through its receptor, a cytokine receptor, leading to the stimulation of POMC neurons and suppressing appetite?",
+            choices: "Leptin/Insulin/Ghrelin/Adiponectin/None of the above",
+            answer: "Leptin",
+            select: "",
+            state: false
+        }, {
+            problem: "What is the function of EPO, a hormone that stimulates erythropoiesis?",
+            choices: "Treat Anemia/Regulate blood sugar/Lower cholesterol/Boost Immune response/None of the above",
+            answer: "Treat Anemia",
+            select: "",
+            state: false
+        }];
+        var questions = questions1.concat(questions2, questions3, questions4, questions5, questions6, questions7, questions8);
+
+
+
+        var current_question = {};
+        var score = 0;
+
+        // make function if check box is active then include array in random_question
+        // if not active then remove array from random_question
+        $("input[type='checkbox']").change(function () {
+            $("#feedback").text("");
+            var quiz1 = document.getElementById("quiz1").checked;
+            var quiz2 = document.getElementById("quiz2").checked;
+            var quiz3 = document.getElementById("quiz3").checked;
+            var quiz4 = document.getElementById("quiz4").checked;
+            var quiz5 = document.getElementById("quiz5").checked;
+            var quiz6 = document.getElementById("quiz6").checked;
+            var quiz7 = document.getElementById("quiz7").checked;
+            var quiz8 = document.getElementById("quiz8").checked;
+            random_question = [];
+            // reset score = 0 when use check box
+            score = 0;
+            if (quiz1 && !quiz2 && !quiz3 && !quiz4 && !quiz5 && !quiz6 && !quiz7 && !quiz8) {
+                random_question = random_question.concat(questions1);
+            }
+            if (quiz2 && !quiz1 && !quiz3 && !quiz4 && !quiz5 && !quiz6 && !quiz7 && !quiz8) {
+                random_question = random_question.concat(questions2);
+            }
+            if (quiz3 && !quiz1 && !quiz2 && !quiz4 && !quiz5 && !quiz6 && !quiz7 && !quiz8) {
+                random_question = random_question.concat(questions3);
+            }
+            if (quiz4 && !quiz1 && !quiz2 && !quiz3 && !quiz5 && !quiz6 && !quiz7 && !quiz8) {
+                random_question = random_question.concat(questions4);
+            }
+            if (quiz5 && !quiz1 && !quiz2 && !quiz3 && !quiz4 && !quiz6 && !quiz7 && !quiz8) {
+                random_question = random_question.concat(questions5);
+            }
+            if (quiz6 && !quiz1 && !quiz2 && !quiz3 && !quiz4 && !quiz5 && !quiz7 && !quiz8) {
+                random_question = random_question.concat(questions6);
+            }
+            if (quiz7 && !quiz1 && !quiz2 && !quiz3 && !quiz4 && !quiz5 && !quiz6 && !quiz8) {
+                random_question = random_question.concat(questions7);
+            }
+            if (quiz8 && !quiz1 && !quiz2 && !quiz3 && !quiz4 && !quiz5 && !quiz6 && !quiz7) {
+                random_question = random_question.concat(questions8);
+            }
+            if (!quiz1 && !quiz2 && !quiz3 && !quiz4 && !quiz5 && !quiz6 && !quiz7 && !quiz8) {
+                random_question = questions;
+            }
+            random_question = random_question.sort(() => Math.random() - 0.5);
+            $("#score").text(" " + "Score: " + score + "/" + random_question.length);
+            $("feedback").text("");
+            questionIndex = 0;
+            showquestion();
+        });
+
+
+        function nextquestion() {
+            if (questionIndex < random_question.length - 1) {
+                questionIndex++;
+                console.log(questionIndex);
+                showquestion();
+                $("#answer").val("");
+                if (random_question[questionIndex].state === false) {
+                    $("#feedback").text("");
+                }
+                else {
+                    $("#feedback").text("Answer : " + " " + random_question[questionIndex].answer);
+                }
+
+            }
+        }
+
+
+        $("#next-question").click(function () {
+            if (!random_question[questionIndex].state) {
+                alert("Please select an answer");
+                return;
+            }
+            else {
+                nextquestion();
+            }
+        });
+
+        function prevquestion() {
+            if (questionIndex > 0) {
+                questionIndex--;
+                console.log(questionIndex);
+                showquestion();
+                $("#answer").val("");
+                $("#feedback").text("Answer : " + " " + random_question[questionIndex].answer);
+            }
+        }
+
+        $("#prev-question").click(function () {
+            prevquestion();
+        });
+
+        function showquestion() {
+            showsubmission(random_question);
+            console.log(random_question);
+            console.log(questionIndex);
+            current_question = random_question[questionIndex];
+            if (current_question.state === true) {
+                $("#question").text(current_question.problem);
+                $("#choices").empty();
+                var choices = current_question.choices.split("/");
+                for (var i = 0; i < choices.length; i++) {
+                    $("#choices").append("<button>" + choices[i] + "</button>");
+                }
+                $("#feedback").empty();
+                if (current_question.select === current_question.answer) {
+                    $("#feedback").addClass("correct");
+                    $("#feedback").text("Correct! : " + " " + current_question.answer);
+                } else {
+                    $("#feedback").text("Incorrect!, Your Ans: " + current_question.select);
+                    $("#feedback").addClass("incorrect");
+                }
+            }
+            else {
+                $("#question").text(current_question.problem);
+                var choices = current_question.choices.split("/");
+                $("#choices").empty();
+                n = choices.length;
+                for (var i = 0; i < n; i++) {
+                    // re arrange choice for each question
+                    var random = Math.floor(Math.random() * choices.length);
+                    $("#choices").append("<button>" + choices[random] + "</button>");
+                    choices.splice(random, 1); // remove choice that already append to button
+
+                }
+            }
+            $("#questionIndex").text(questionIndex + 1);
+        }
+
+
+
+        function submitquestion() {
+            var selected = $("button").filter(".selected").text();
+            random_question[questionIndex].select = selected;
+            // check if answer of question is array because some question have multiple answer
+            if (Array.isArray(current_question.answer)) {
+                var correct = false;
+                var i = 0;
+                while (i < current_question.answer.length && !correct) {
+                    if (selected === current_question.answer[i]) {
+                        console.log(current_question.answer[i]);
+                        console.log(selected);
+                        correct = true;
+                        console.log(correct);
+                    }
+                    i++;
+                }
+                if (correct) {
+                    if (random_question[questionIndex].state === false) {
+                        random_question[questionIndex].state = true;
+                        score++;
+                    }
+                    $("#score").text(" " + "Score: " + score + "/" + random_question.length);
+                    $("#feedback").addClass("correct");
+                    $("#feedback").text("Correct!: " + " " + current_question.answer);
+                } else {
+                    random_question[questionIndex].state = true;
+                    $("#feedback").text("Incorrect!, Correct Ans: " + current_question.answer);
+                    $("#feedback").addClass("incorrect");
+                }
+            } else {
+
+                if (selected === current_question.answer) {
+                    if (random_question[questionIndex].state === false) {
+                        random_question[questionIndex].state = true;
+                        score++;
+                    }
+                    $("#score").text(" " + "Score: " + score + "/" + random_question.length);
+                    $("#feedback").addClass("correct");
+                    $("#feedback").text("Correct! : " + " " + current_question.answer);
+                } else {
+                    random_question[questionIndex].state = true;
+                    $("#feedback").text("Incorrect!, Correct Ans: " + current_question.answer);
+                    $("#feedback").addClass("incorrect");
+                }
+            }
+        }
+
+
+        $("#choices").on("click", "button", function () {
+            $(this).addClass("selected").siblings().removeClass("selected");
+        });
+
+        $("#submit-btn").click(function () {
+            submitquestion();
+        });
+
+        function showsubmission(random_question) {
+            var table = document.querySelector("table");
+            table.innerHTML = "";
+            for (var i = 0; i < random_question.length; i++) {
+                if (random_question[i].state === true && random_question[i].select !== random_question[i].answer) {
+                    var row = table.insertRow();
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    cell1.innerHTML = random_question[i].problem;
+                    cell2.innerHTML = random_question[i].answer;
+                    cell3.innerHTML = random_question[i].select;
+                }
+            }
+        }
+
+        check();
+        showquestion();
+    });
+
+</script>
+
+<body>
+    <div class="row">
+        <!-- create 3 checkboxs to choose the question array-->
+        <div class="checkbox-container">
+            <input type="checkbox" id="quiz1" name="quiz1" value="quiz1">
+            <label for="quiz1">Chem of living cell</label>
+            <input type="checkbox" id="quiz2" name="quiz2" value="quiz2">
+            <label for="quiz2">Protein</label>
+            <input type="checkbox" id="quiz3" name="quiz3" value="quiz3">
+            <label for="quiz3">Carbohydrate</label>
+            <input type="checkbox" id="quiz4" name="quiz4" value="quiz4">
+            <label for="quiz4">Lipid</label>
+            <input type="checkbox" id="quiz5" name="quiz5" value="quiz5">
+            <label for="quiz5">Biological membrane</label>
+            <input type="checkbox" id="quiz6" name="quiz6" value="quiz6">
+            <label for="quiz6">Nucleotide</label>
+            <input type="checkbox" id="quiz7" name="quiz7" value="quiz7">
+            <label for="quiz7">Enzyme</label>
+            <input type="checkbox" id="quiz8" name="quiz8" value="quiz8">
+            <label for="quiz8">Hormone & Metabolism</label>
+
+            <!-- comment small text to show the reference -->
+            <div class="small">หมายเหตุ : เลือกได้ทีละชุด หรือ ถ้าไม่เลือกเลยจะสุ่มจากทุกชุด</div>
+        </div>
+        <div id="quiz-container" class="center-column">
+            <!-- show questionindex -->
+            <h1>Random Quiz ตอนนี้อยู่ข้อ <span id="questionIndex"></span><span id="score"></span>
+            </h1>
+            <p id="question"></p>
+            <div id="choices"></div>
+            <button id="submit-btn">Submit Answer</button>
+            <p id="feedback" onclick="wow"></p>
+            <div class="row">
+                <button id="prev-question">Previous Question</button>
+                <button id="next-question">Next Question</button>
+            </div>
+            <!-- หมายเหตุ -->
+            <!-- <div class="small">ref. mdkkudatabase</div> -->
+        </div>
+        <!-- create table to show the submission -->
+        <table>
+            <tr>
+                <th>Question</th>
+                <th>Correct Answer</th>
+                <th>Your Answer</th>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>
